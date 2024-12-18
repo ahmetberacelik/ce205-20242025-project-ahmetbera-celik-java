@@ -109,7 +109,6 @@ public class RecipeCosting {
         out.println("Recipe created successfully!");
         userAuth.enterToContinue();
     }
-
     /**
      * @brief Edits an existing recipe.
      *
@@ -271,7 +270,6 @@ public class RecipeCosting {
         saveRecipesToFile(pathFileRecipes, recipes);
         System.out.println("Recipe updated successfully!");
     }
-
     /**
      * @brief Calculates the total cost of a specific recipe.
      *
@@ -449,3 +447,197 @@ public class RecipeCosting {
             });
         });
     }
+    /**
+     * @brief Provides an analysis of ingredient usage across all recipes.
+     *
+     * Prompts the user to choose a traversal method (BFS or DFS) to analyze ingredient usage
+     * in all recipes.
+     *
+     * @param recipes The list of existing recipes.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted.
+     */
+    public void analyzeIngredientUsage(List<Recipe> recipes) throws InterruptedException, IOException {
+        out.println("How would you like to analyze the ingredients used in all recipes?");
+        out.println("1) BFS (Breadth-First Search)");
+        out.println("2) DFS (Depth-First Search)");
+        out.print("Enter your choice (1-2): ");
+        int choice = userAuth.getInput();
+
+        switch (choice) {
+            case 1:
+                traverseRecipesBFS(recipes);
+                break;
+            case 2:
+                traverseRecipesDFS(recipes);
+                break;
+            default:
+                out.println("Invalid choice. Returning to menu.");
+                break;
+        }
+        userAuth.enterToContinue();
+    }
+
+    /**
+     * @param pathFileRecipes File path to load the recipes from.
+     * @return A list of loaded recipes.
+     * @brief Loads recipes from a file.
+     */
+    public List<Recipe> loadRecipesFromFile(String pathFileRecipes) throws IOException {
+        List<Recipe> recipes = new ArrayList<>();
+        File file = new File(pathFileRecipes);
+
+        if (!file.exists()) {
+            out.println("Error opening recipe file.");
+            return recipes;
+        }
+
+        try (DataInputStream reader = new DataInputStream(new FileInputStream(file))) {
+            while (reader.available() > 0) {
+                Recipe recipe = new Recipe();
+                // Read recipe name
+                recipe.setName(reader.readUTF());
+                // Read recipe category
+                recipe.setCategory(reader.readInt());
+                // Read ingredients
+                int ingredientCount = reader.readInt();
+                List<Integer> ingredients = new ArrayList<>();
+                for (int i = 0; i < ingredientCount; i++) {
+                    ingredients.add(reader.readInt());
+                }
+                recipe.setIngredients(ingredients);
+                recipes.add(recipe);
+            }
+        }
+
+        return recipes;
+    }
+    /**
+     * @brief Searches for recipes by category using a B+ tree.
+     *
+     * Prompts the user to input a category and searches the B+ tree for recipes in the
+     * specified category.
+     *
+     * @param bPlusTree The B+ tree containing recipes indexed by category.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted.
+     */
+    private void searchRecipeByCategory(BPlusTree bPlusTree) throws IOException, InterruptedException {
+        out.println("Enter category to search (1: Soup, 2: Appetizer, 3: Main Course, 4: Dessert): ");
+        int category = userAuth.getInput();
+
+        if (category < 1 || category > 4) {
+            out.println("Invalid category choice.");
+            userAuth.enterToContinue();
+            return;
+        }
+
+        out.println("Recipes in selected category:");
+        bPlusTree.search(category);
+
+        userAuth.enterToContinue();
+    }
+    /**
+     * @brief Analyzes the recipes for Strongly Connected Components (SCC).
+     *
+     * Constructs a recipe graph, resets its state, and uses Tarjan's algorithm to find and
+     * display SCCs within the recipe graph.
+     *
+     * @param recipes The list of existing recipes.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted.
+     */
+    private void analyzeSCC(List<Recipe> recipes) throws IOException, InterruptedException {
+        RecipeGraph recipeGraph = RecipeGraph.buildGraphFromRecipes(recipes, scanner);
+
+        // Reset graph state before running SCC
+        recipeGraph.resetGraphState();
+
+        out.println("+--------------------------------------+\n"
+                + "|   STRONGLY CONNECTED COMPONENTS      |\n"
+                + "+--------------------------------------+\n");
+        recipeGraph.tarjanSCC(recipes);
+        userAuth.enterToContinue();
+    }
+    /**
+     * @brief Displays and handles the Recipe Costing Menu.
+     *
+     * The method provides a menu for users to manage recipes, calculate costs, search by category,
+     * analyze ingredient usage, and analyze Strongly Connected Components (SCC) in the recipe graph.
+     * It dynamically updates the B+ tree and recipe graph based on user actions.
+     *
+     * @param pathFileIngredients Path to the file containing ingredients.
+     * @param pathFileRecipes Path to the file containing recipes.
+     * @return Returns `true` when the user exits the menu.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted.
+     */
+    public boolean recipeCostingMenu(String pathFileIngredients, String pathFileRecipes) throws IOException, InterruptedException {
+        userAuth.clearScreen();
+        List<Recipe> recipes = loadRecipesFromFile(pathFileRecipes);
+        BPlusTree bPlusTree = new BPlusTree();
+        RecipeGraph recipeGraph = RecipeGraph.buildGraphFromRecipes(recipes, scanner);
+
+        for (Recipe recipe : recipes) {
+            bPlusTree.insert(recipe.getCategory(), recipe);
+        }
+        while (true) {
+            userAuth.clearScreen();
+            out.println("+--------------------------------------+\n"
+                    + "|           RECIPE COSTING MENU        |\n"
+                    + "+--------------------------------------+\n"
+                    + "| 1. Create Recipe                     |\n"
+                    + "| 2. Edit Recipe                       |\n"
+                    + "| 3. Calculate Recipe Cost             |\n"
+                    + "| 4. Search Recipe by Category         |\n"
+                    + "| 5. Analyze Ingredient Usage          |\n"
+                    + "| 6. Analyze SCC in Recipe Graph       |\n"
+                    + "| 7. Exit                              |\n"
+                    + "+--------------------------------------+\n");
+            out.print("Enter your choice: ");
+            int choice = userAuth.getInput();
+
+            if (choice == -2) {
+                userAuth.handleInputError();
+                userAuth.enterToContinue();
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    createRecipe(recipes, pathFileIngredients, pathFileRecipes);
+                    bPlusTree = new BPlusTree();
+                    for (Recipe recipe : recipes) {
+                        bPlusTree.insert(recipe.getCategory(), recipe);
+                    }
+                    break;
+                case 2:
+                    editRecipe(recipes, pathFileIngredients, pathFileRecipes);
+                    bPlusTree = new BPlusTree();
+                    for (Recipe recipe : recipes) {
+                        bPlusTree.insert(recipe.getCategory(), recipe);
+                    }
+                    break;
+                case 3:
+                    calculateRecipeCost(recipes, pathFileIngredients, pathFileRecipes);
+                    break;
+                case 4:
+                    searchRecipeByCategory(bPlusTree);
+                    break;
+                case 5:
+                    analyzeIngredientUsage(recipes);
+                    break;
+                case 6:
+                    analyzeSCC(recipes);
+                    break;
+                case 7:
+                    return true;
+                default:
+                    out.println("Invalid choice. Please try again.");
+                    userAuth.enterToContinue();
+                    break;
+            }
+        }
+    }
+
+}
