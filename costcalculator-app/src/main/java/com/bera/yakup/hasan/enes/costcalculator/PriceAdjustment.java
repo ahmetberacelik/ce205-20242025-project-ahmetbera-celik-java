@@ -288,4 +288,137 @@ public class PriceAdjustment {
         return null;
     }
 
+    /**
+     * @param pathFileIngredients Path to the ingredient file.
+     * @return 1 if the ingredient price was successfully updated, otherwise 0.
+     * @brief Adjusts the price of an ingredient.
+     */
+    public int adjustIngredientPrice(String pathFileIngredients) throws IOException, InterruptedException {
+        userAuth.clearScreen();
+        List<Ingredient> ingredients = convertDoubleLinkToArray(pathFileIngredients);
+
+        if (ingredients.isEmpty()) {
+            return 0;
+        }
+
+        // Ensure totalIngredient is a prime number for better hash distribution
+        int totalIngredient = findNextPrime(ingredients.size());
+
+        while (true) {
+            userAuth.clearScreen();
+            printIngredientsToConsole(pathFileIngredients);
+
+            // Get ingredient id from user
+            out.print("Enter Ingredient Id: ");
+            int ingredientId = userAuth.getInput();
+
+            // Check if ingredient id is valid
+            if (ingredientId < 0) {
+                out.println("Invalid Ingredient Id");
+                userAuth.enterToContinue();
+                continue;
+            }
+
+            // Select algorithm for searching the ingredient
+            userAuth.clearScreen();
+            out.println("\n+--------------------------------------+\n" +
+                    "|     SELECT SEARCH ALGORITHM TO USE   |\n" +
+                    "+--------------------------------------+\n" +
+                    "| 1. Linear Probing                    |\n" +
+                    "| 2. Quadratic Probing                 |\n" +
+                    "| 3. Double Hashing                    |\n" +
+                    "| 4. Progressive Overflow              |\n" +
+                    "| 5. Use of Buckets                    |\n" +
+                    "| 6. Linear Quotient                   |\n" +
+                    "| 7. Brent's Method                    |\n" +
+                    "+--------------------------------------+\n");
+            out.print("Enter your choice (1-7): ");
+            int algorithmChoice = scanner.nextInt();
+
+            Ingredient ingredient = null;
+
+            // Search for the ingredient using the selected algorithm
+            switch (algorithmChoice) {
+                case 1:
+                    ingredient = linearProbingSearch(ingredients, ingredientId);
+                    break;
+                case 2:
+                    ingredient = quadraticProbingSearch(ingredients, ingredientId);
+                    break;
+                case 3:
+                    ingredient = doubleHashingSearch(ingredients, ingredientId);
+                    break;
+                case 4:
+                    ingredient = progressiveOverflowSearch(ingredients, ingredientId);
+                    break;
+                case 5: {
+                    int totalBuckets = findNextPrime(totalIngredient);
+                    List<Bucket> buckets = new ArrayList<>(totalBuckets);
+                    for (int i = 0; i < totalBuckets; i++) {
+                        buckets.add(new Bucket());
+                    }
+
+                    // Fill buckets
+                    for (Ingredient ing : ingredients) {
+                        int bucketIndex = ing.getId() % totalBuckets;
+                        ing.setNext(buckets.get(bucketIndex).getHead());
+                        buckets.get(bucketIndex).setHead(ing);
+                    }
+
+                    ingredient = bucketSearch(buckets, ingredientId);
+
+                    // Update the original ingredients list if found in bucket
+                    if (ingredient != null) {
+                        for (int i = 0; i < ingredients.size(); i++) {
+                            if (ingredients.get(i).getId() == ingredient.getId()) {
+                                ingredients.set(i, ingredient);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 6:
+                    ingredient = linearQuotientSearch(ingredients, ingredientId, 1); // Using increment value of 1
+                    break;
+                case 7:
+                    ingredient = brentMethodSearch(ingredients, ingredientId);
+                    break;
+                default:
+                    out.println("Invalid choice");
+                    userAuth.enterToContinue();
+                    continue;
+            }
+
+            // Check if ingredient was found
+            if (ingredient == null) {
+                out.println("Ingredient not found");
+                userAuth.enterToContinue();
+                break;
+            }
+
+            // Get new price from user
+            out.print("Enter new price: ");
+            float newPrice = scanner.nextFloat();
+
+            // Update the price of the ingredient
+            ingredient.setPrice(newPrice);
+
+            // Save the updated ingredients to file
+            try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(pathFileIngredients))) {
+                for (Ingredient ing : ingredients) {
+                    writer.writeInt(ing.getId());
+                    writer.writeUTF(ing.getName());
+                    writer.writeFloat(ing.getPrice());
+                }
+            }
+
+            out.println("The ingredient was successfully updated");
+            userAuth.enterToContinue();
+            return 1;
+        }
+
+        return 0;
+    }
+
 }
