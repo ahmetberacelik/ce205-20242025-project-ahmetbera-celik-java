@@ -63,3 +63,54 @@ public class BudgetPlannerTest {
         BudgetPlanner budgetPlanner = new BudgetPlanner(userAuthentication,recipeCosting,ingredientManagement,priceAdjustment, testScanner,System.out);
         return budgetPlanner;
     }
+    private BudgetPlanner simulateUserInput(String input) {
+        ByteArrayInputStream inContent = new ByteArrayInputStream(input.getBytes());
+        Scanner testScanner = new Scanner(inContent);
+        return getBudgetPlanner(testScanner);
+    }
+    private void deleteFile(String filePath) throws IOException {
+        Files.deleteIfExists(Paths.get(filePath));
+    }
+    @Test
+    public void exitBudgetPlannerMenuTest() throws IOException, InterruptedException {
+        BudgetPlanner budgetPlanner = simulateUserInput("100\n3\n");
+        int result = budgetPlanner.budgetPlannerMenu(recipeCostingTestFile, ingredientTestFile);
+        Assert.assertEquals(result,1);
+    }
+    @Test
+    public void listRecipesWithPricesTest() throws IOException {
+        // Simulate recipes and ingredients files
+        List<Recipe> recipes = new ArrayList<>();
+        List<Ingredient> ingredients = new ArrayList<>();
+
+        // Add mock data
+        Ingredient ingredient1 = new Ingredient();
+        ingredient1.setId(1);
+        ingredient1.setName("Tomato");
+        ingredient1.setPrice(2.5f);
+        ingredients.add(ingredient1);
+
+        Recipe recipe1 = new Recipe("Tomato Soup", 1);
+        recipe1.setIngredients(Collections.singletonList(1));
+        recipes.add(recipe1);
+
+        // Write mock data to files
+        RecipeCosting recipeCosting = new RecipeCosting(null, null, null, System.out);
+        recipeCosting.saveRecipesToFile(recipeCostingTestFile, recipes);
+
+        PriceAdjustment priceAdjustment = new PriceAdjustment(null, null, null, System.out);
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(ingredientTestFile))) {
+            for (Ingredient ing : ingredients) {
+                writer.writeInt(ing.getId());
+                writer.writeUTF(ing.getName());
+                writer.writeFloat(ing.getPrice());
+            }
+        }
+
+        // Test
+        BudgetPlanner budgetPlanner = simulateUserInput("");
+        int result = budgetPlanner.listRecipesWithPrices(recipeCostingTestFile, ingredientTestFile);
+        Assert.assertEquals(1, result);
+        String output = outContent.toString();
+        Assert.assertTrue(output.contains("Tomato Soup"));
+    }
