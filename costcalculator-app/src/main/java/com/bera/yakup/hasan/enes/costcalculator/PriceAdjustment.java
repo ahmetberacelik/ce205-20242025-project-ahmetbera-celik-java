@@ -421,4 +421,93 @@ public class PriceAdjustment {
         return 0;
     }
 
+    /**
+     * @param pathFileIngredients Path to the ingredient file.
+     * @return 1 if successful.
+     * @brief Resets the prices of all ingredients.
+     */
+    public int resetIngredientPrice(String pathFileIngredients) throws IOException, InterruptedException {
+        userAuth.clearScreen();
+        List<Ingredient> ingredients = convertDoubleLinkToArray(pathFileIngredients);
+
+        if (ingredients.isEmpty()) {
+            return 0;
+        }
+
+        // Show the current prices of all ingredients
+        printIngredientsToConsole(pathFileIngredients);
+
+        // Choose one of them to reset the price
+        out.print("Enter Ingredient Id: ");
+        int ingredientId = userAuth.getInput();
+        if (ingredientId == -2) {
+            out.println("Invalid Ingredient Id");
+            userAuth.enterToContinue();
+            return -1;
+        }
+
+        // Find the ingredient and reset the price
+        for (Ingredient ingredient : ingredients) {
+            if (ingredient.getId() == ingredientId) {
+                ingredient.setPrice(0.0f);
+                break;
+            }
+        }
+
+        // Save the updated ingredients to file
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(pathFileIngredients))) {
+            for (Ingredient ingredient : ingredients) {
+                writer.writeInt(ingredient.getId());
+                writer.writeUTF(ingredient.getName());
+                writer.writeFloat(ingredient.getPrice());
+            }
+        }
+
+        out.println("The ingredient price was successfully reset");
+        userAuth.enterToContinue();
+        return 1;
+    }
+
+    /**
+     * @param pathFileIngredients Path to the ingredient file.
+     * @return 1 on exit.
+     * @brief Displays a menu for adjusting ingredient prices.
+     */
+    public int adjustIngredientPriceMenu(String pathFileIngredients) throws IOException, InterruptedException {
+        int choice;
+        while (true) {
+            userAuth.clearScreen();
+            out.println("\n+--------------------------------------+\n" +
+                    "|           PRICE ADJUSTMENT MENU      |\n" +
+                    "+--------------------------------------+\n" +
+                    "| 1. Adjust Ingredient Price           |\n" +
+                    "| 2. Reset Price                       |\n" +
+                    "| 3. Exit                              |\n" +
+                    "+--------------------------------------+\n");
+            out.print("Enter your choice: ");
+
+            choice = userAuth.getInput();
+            if (choice == -2) {
+                userAuth.handleInputError();
+                userAuth.enterToContinue();
+                continue;
+            }
+            switch (choice) {
+                case 1:
+                    adjustIngredientPrice(pathFileIngredients);
+                    break;
+                case 2:
+                    resetIngredientPrice(pathFileIngredients);
+                    break;
+                case 3:
+                    return 1;
+                default:
+                    userAuth.clearScreen();
+                    out.println("Invalid choice. Please try again.");
+                    userAuth.enterToContinue();
+                    break;
+            }
+        }
+    }
+
 }
