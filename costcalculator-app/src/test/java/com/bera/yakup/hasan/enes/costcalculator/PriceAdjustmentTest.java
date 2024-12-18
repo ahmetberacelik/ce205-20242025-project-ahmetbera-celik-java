@@ -190,3 +190,31 @@ public class PriceAdjustmentTest {
         int result = priceAdjustment.resetIngredientPrice(ingredientTestFile);
         Assert.assertEquals(1, result);
     }
+
+    @Test
+    public void adjustIngredientPrice_LineerProbing_Test() throws IOException, InterruptedException {
+        createIngredientFile();
+
+        String simulatedInput = "qwe\n\n1\n1\n111\n";  // Invalid Ingredient ID
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+        int result = priceAdjustment.adjustIngredientPrice(ingredientTestFile);
+        Assert.assertEquals(1, result);
+    }
+    @Test
+    public void adjustIngredientPrice_QuadraticProbingSearch_Test() throws IOException, InterruptedException {
+        createIngredientFile();
+
+        String simulatedInput = "1\n2\n222\n";  // Invalid Ingredient ID
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+        int result = priceAdjustment.adjustIngredientPrice(ingredientTestFile);
+        Assert.assertEquals(1, result);
+    }
+    @Test
+    public void adjustIngredientPrice_DoubleHashingSearch_Test() throws IOException, InterruptedException {
+        createIngredientFile();
+
+        String simulatedInput = "1\n3\n333\n";  // Invalid Ingredient ID
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+        int result = priceAdjustment.adjustIngredientPrice(ingredientTestFile);
+        Assert.assertEquals(1, result);
+    }
