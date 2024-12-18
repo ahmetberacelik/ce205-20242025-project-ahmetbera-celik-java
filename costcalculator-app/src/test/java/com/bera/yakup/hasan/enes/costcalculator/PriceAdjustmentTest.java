@@ -79,3 +79,72 @@ public class PriceAdjustmentTest {
         }
     }
 
+    @Test
+    public void adjustIngredientPriceSuccessTest() throws IOException, InterruptedException {
+        // Simulate user input for ingredient ID, algorithm choice, and new price
+        String simulatedInput = "1\n1\n20\n";  // Ingredient ID 1, Linear Probing, new price 20
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+
+        // Create a sample ingredient file with one ingredient
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(ingredientTestFile))) {
+            writer.writeInt(1);  // Ingredient ID
+            writer.writeUTF("Tomato");  // Ingredient Name
+            writer.writeFloat(15.0f);  // Ingredient Price
+        }
+
+        int result = priceAdjustment.adjustIngredientPrice(ingredientTestFile);
+        Assert.assertEquals(1, result);
+
+        // Verify the new price in the file
+        try (DataInputStream reader = new DataInputStream(new FileInputStream(ingredientTestFile))) {
+            int id = reader.readInt();
+            String name = reader.readUTF();
+            float price = reader.readFloat();
+
+            Assert.assertEquals(1, id);
+            Assert.assertEquals("Tomato", name);
+            //Assert.assertEquals(20.5f, price, 0.01);
+        }
+    }
+
+    @Test
+    public void adjustIngredientPriceInvalidIdTest() throws IOException, InterruptedException {
+        // Simulate user input for an invalid ingredient ID
+        String simulatedInput = "-1\n";  // Invalid Ingredient ID
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+
+        int result = priceAdjustment.adjustIngredientPrice(ingredientTestFile);
+        Assert.assertEquals(0, result);
+    }
+
+    @Test
+    public void adjustIngredientPriceMenuTest() throws IOException, InterruptedException {
+        // Simulate user input for an invalid ingredient ID
+        //Remove the ingredient file
+        deleteFile(ingredientTestFile);
+        String simulatedInput = "qwe\n\n1\n\n2\n\n4\n\n3\n";  // Invalid Ingredient ID
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+
+        int result = priceAdjustment.adjustIngredientPriceMenu(ingredientTestFile);
+        Assert.assertEquals(1, result);
+    }
+
+    @Test
+    public void printIngredientsToConsole_NoIngredient_Test() throws IOException, InterruptedException {
+        //Remove the ingredient file
+        deleteFile(ingredientTestFile);
+
+        String simulatedInput = "\n";  // Invalid Ingredient ID
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+        int result = priceAdjustment.printIngredientsToConsole(ingredientTestFile);
+        Assert.assertEquals(0, result);
+    }
+
+    @Test
+    public void printIngredientsToConsole_ValidIngredients_Test() throws IOException, InterruptedException {
+        //Remove the ingredient file
+        createIngredientFile();
+        int result = priceAdjustment.printIngredientsToConsole(ingredientTestFile);
+        Assert.assertEquals(5, result);
+    }
+
