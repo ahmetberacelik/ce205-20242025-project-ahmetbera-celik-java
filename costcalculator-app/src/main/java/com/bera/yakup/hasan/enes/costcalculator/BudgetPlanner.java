@@ -187,3 +187,57 @@ public class BudgetPlanner {
         userAuth.enterToContinue();
         return budget; // Return updated budget
     }
+
+    /**
+     * @brief Displays and handles the budget planner menu.
+     *
+     * Allows the user to interact with budget planning features, such as meal planning
+     * and viewing the current budget.
+     *
+     * @param pathFileRecipes Path to the file containing recipes.
+     * @param pathFileIngredients Path to the file containing ingredients.
+     * @return Returns 1 when exiting the menu.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted.
+     */
+    public int budgetPlannerMenu(String pathFileRecipes, String pathFileIngredients) throws IOException, InterruptedException {
+        // Ask user for their current budget
+        double budget;
+        out.print("\nEnter your current budget: ");
+        do {
+            budget = userAuth.getInput();
+        } while (budget == -2);
+
+        int choice;
+        while (true) {
+            userAuth.clearScreen();
+            out.println("\n=== Budget Planner Menu ===\n");
+            out.println("1. Plan Meals");
+            out.println("2. View Budget");
+            out.println("3. Exit\n");
+            out.print("Your choice: ");
+
+            choice = userAuth.getInput();
+            if (choice == -2) {
+                userAuth.handleInputError();
+                userAuth.enterToContinue();
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    budget = planMeals(pathFileRecipes, pathFileIngredients, budget); // Update budget
+                    break;
+                case 2:
+                    viewBudget(budget); // Show updated budget
+                    break;
+                case 3:
+                    return 1;
+                default:
+                    out.println("\nInvalid choice. Please try again.\n");
+                    userAuth.enterToContinue();
+                    break;
+            }
+        }
+    }
+}
