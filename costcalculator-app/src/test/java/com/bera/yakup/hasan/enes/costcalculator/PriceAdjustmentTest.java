@@ -148,3 +148,45 @@ public class PriceAdjustmentTest {
         Assert.assertEquals(5, result);
     }
 
+    @Test
+    public void adjustIngredientPriceValidUpdateTest() throws IOException, InterruptedException {
+        // Simulate user input for ingredient ID, algorithm choice, and new price
+        String simulatedInput = "1\n1\n20.5\n";  // Ingredient ID 1, Linear Probing, new price 20.5
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+        // Create a sample ingredient file with one ingredient
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(ingredientTestFile))) {
+            writer.writeInt(1);  // Ingredient ID
+            writer.writeUTF("Tomato");  // Ingredient Name
+            writer.writeFloat(15.0f);  // Ingredient Price
+        }
+        int result = priceAdjustment.adjustIngredientPrice(ingredientTestFile);
+        Assert.assertEquals(1, result);
+        Assert.assertTrue(outContent.toString().contains("The ingredient was successfully updated"));
+        // Verify the new price in the file
+        try (DataInputStream reader = new DataInputStream(new FileInputStream(ingredientTestFile))) {
+            int id = reader.readInt();
+            String name = reader.readUTF();
+            float price = reader.readFloat();
+            Assert.assertEquals(1, id);
+            Assert.assertEquals("Tomato", name);
+            Assert.assertEquals(20.5f, price, 0.01);
+        }
+    }
+    @Test
+    public void resetPrice_InvalidIngredientId_Test() throws IOException, InterruptedException {
+        createIngredientFile();
+
+        String simulatedInput = "qwe\n\n";  // Invalid Ingredient ID
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+        int result = priceAdjustment.resetIngredientPrice(ingredientTestFile);
+        Assert.assertEquals(-1, result);
+    }
+    @Test
+    public void resetPrice_ValidIngredientId_Test() throws IOException, InterruptedException {
+        createIngredientFile();
+
+        String simulatedInput = "1\n\n";  // Invalid Ingredient ID
+        PriceAdjustment priceAdjustment = simulateUserInput(simulatedInput);
+        int result = priceAdjustment.resetIngredientPrice(ingredientTestFile);
+        Assert.assertEquals(1, result);
+    }
