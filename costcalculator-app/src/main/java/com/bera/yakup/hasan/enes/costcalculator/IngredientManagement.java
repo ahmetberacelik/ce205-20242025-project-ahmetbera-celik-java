@@ -129,4 +129,69 @@ public class IngredientManagement {
         return head;
     }
 
+    public boolean saveIngredientsToFile(Ingredient head, String filePath) throws IOException{
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(filePath))) {
+            Ingredient temp = head;
+
+            while (temp != null) {
+                out.writeInt(temp.getId());
+                out.writeUTF(temp.getName());
+                out.writeFloat(temp.getPrice());
+                temp = temp.getNext();
+            }
+            return true;
+        }
+    }
+
+    public boolean listIngredientsDLL(Ingredient head) {
+        if (head == null) {
+            out.println("No ingredients available.");
+            return false;
+        }
+
+        Ingredient current = head;
+        out.println("+----------------------------+");
+        out.println("|Available Ingredients (DLL):|");
+        out.println("+----------------------------+");
+
+        while (current != null) {
+            out.println("--------------------------------------------------------------------");
+            out.printf("ID: %d, Name: %s, Price: %.2f\n", current.getId(), current.getName(), current.getPrice());
+            current = current.getNext();
+        }
+        out.println("--------------------------------------------------------------------");
+        return true;
+    }
+
+    public boolean listIngredientsXLL(Ingredient head) {
+        if (head == null) {
+            out.println("No ingredients available.");
+            return false;
+        }
+
+        Ingredient current = head;
+        out.println("+----+----------------------+------------+----------------------+--------+");
+        out.println("| ID | Name                 | Price      | Next/Prev            | Price  |");
+        out.println("+----+----------------------+------------+----------------------+--------+");
+
+        while (current != null) {
+            out.printf("| %-2d | %-20s | %-6.2f |", current.getId(), current.getName(), current.getPrice());
+
+            if (current.getNext() != null) {
+                out.printf(" %-20s | %-6.2f |\n", current.getNext().getName(), current.getNext().getPrice());
+            } else {
+                out.printf(" %-20s | %-6s |\n", "-", "-");
+            }
+
+            if (current.getPrev() != null) {
+                out.printf("|    | %-20s | %-6s | %-20s | %-6.2f |\n", "", "", current.getPrev().getName(),
+                        current.getPrev().getPrice());
+            }
+
+            out.println("+----+----------------------+------------+----------------------+--------+");
+            current = current.getNext();
+        }
+        return true;
+    }
+
 }
