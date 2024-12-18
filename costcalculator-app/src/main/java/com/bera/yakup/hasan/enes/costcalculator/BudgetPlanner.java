@@ -95,3 +95,95 @@ public class BudgetPlanner {
         userAuth.enterToContinue();
         return 1;
     }
+
+    /**
+     * @brief Plans meals and updates the budget.
+     *
+     * Allows the user to select recipes to plan meals and calculates the total cost,
+     * updating the budget accordingly.
+     *
+     * @param pathFileRecipes Path to the file containing recipes.
+     * @param pathFileIngredients Path to the file containing ingredients.
+     * @param budget The current budget (passed as a reference).
+     * @return Returns the updated budget.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted.
+     */
+    public double planMeals(String pathFileRecipes, String pathFileIngredients, double budget) throws IOException, InterruptedException {
+        List<Recipe> recipes = recipeCosting.loadRecipesFromFile(pathFileRecipes);
+        List<Ingredient> ingredientList = priceAdjustment.convertDoubleLinkToArray(pathFileIngredients);
+
+        if (recipes.isEmpty()) {
+            out.println("\nNo recipes found for meal planning.\n");
+            userAuth.enterToContinue();
+            return budget; // Return unchanged budget
+        }
+
+        double totalCost = 0;
+        List<Integer> selectedRecipeIds = new ArrayList<>();
+
+        // Step 1: List available recipes
+        userAuth.clearScreen();
+        out.println("\n=== Available Recipes ===\n");
+        listRecipesWithPrices(pathFileRecipes, pathFileIngredients);
+
+        // Step 2: Allow user to select recipes by ID
+        out.println("\n=== Recipe Selection ===\n");
+        out.println("Enter recipe ID to add to meal plan. Type 'done' to finish:\n");
+
+        while (true) {
+            out.print("Recipe ID (or 'done'): ");
+            String input = scanner.next();
+
+            if (input.equalsIgnoreCase("done")) {
+                break;
+            }
+
+            int recipeId;
+            try {
+                recipeId = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                out.println("Invalid input. Please enter a valid recipe ID or 'done'.\n");
+                continue;
+            }
+
+            if (recipeId <= 0 || recipeId > recipes.size()) {
+                out.println("Invalid recipe ID. Please select a recipe from the list.\n");
+                continue;
+            }
+
+            Recipe selectedRecipe = recipes.get(recipeId - 1); // Adjusting for 0-based indexing
+
+            // Calculate the cost of the selected recipe
+            double recipeCost = 0;
+            for (int ingredientId : selectedRecipe.getIngredients()) {
+                for (Ingredient ingredient : ingredientList) {
+                    if (ingredient.getId() == ingredientId) {
+                        recipeCost += ingredient.getPrice();
+                        break;
+                    }
+                }
+            }
+
+            // Check if the recipe can be added to the budget
+            if (recipeCost > budget) {
+                out.printf("\nCannot add '%s'. Insufficient funds.\n\n", selectedRecipe.getName());
+                continue;
+            }
+
+            selectedRecipeIds.add(recipeId);
+            totalCost += recipeCost;
+            budget -= recipeCost; // Deduct from budget
+            out.printf("\n'%s' added to meal plan.\n", selectedRecipe.getName());
+            out.printf("Current total cost: %.2f TL\n", totalCost);
+            out.printf("Remaining budget: %.2f TL\n\n", budget);
+        }
+
+        // Display the total cost and remaining budget
+        out.println("\n=== Meal Plan Summary ===\n");
+        out.printf("Total cost of selected recipes: %.2f TL\n", totalCost);
+        out.printf("Remaining budget: %.2f TL\n\n", budget);
+
+        userAuth.enterToContinue();
+        return budget; // Return updated budget
+    }
