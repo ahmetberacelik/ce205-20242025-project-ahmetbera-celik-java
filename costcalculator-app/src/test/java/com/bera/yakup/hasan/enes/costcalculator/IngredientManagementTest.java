@@ -17,23 +17,26 @@ public class IngredientManagementTest {
 
     private Ingredient head;
     private String ingredientTestFile = "ingredientTestFile.bin";
+
     /**
-     * @brief This method is executed once before all test methods.
      * @throws Exception
+     * @brief This method is executed once before all test methods.
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     }
+
     /**
-     * @brief This method is executed once after all test methods.
      * @throws Exception
+     * @brief This method is executed once after all test methods.
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
     }
+
     /**
-     * @brief This method is executed before each test method.
      * @throws Exception
+     * @brief This method is executed before each test method.
      */
     @Before
     public void setUp() throws Exception {
@@ -41,9 +44,10 @@ public class IngredientManagementTest {
         Scanner testScanner = new Scanner(System.in);
         ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
     }
+
     /**
-     * @brief This method is executed after each test method.
      * @throws Exception
+     * @brief This method is executed after each test method.
      */
     @After
     public void tearDown() throws Exception {
@@ -51,16 +55,18 @@ public class IngredientManagementTest {
         System.setIn(originalIn);
         deleteFile(ingredientTestFile);
     }
+
     @Test
     public void exitingredientManagementMenuTest() throws IOException, InterruptedException {
         String testInput = "6\n";
         ByteArrayInputStream inContent = new ByteArrayInputStream(testInput.getBytes());
         Scanner testScanner = new Scanner(inContent);
-        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner,System.out);
+        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
 
         boolean result = ingredientManagement.ingredientManagementMenu(ingredientTestFile);
         assertTrue(result);
     }
+
     @Test
     public void testAddIngredient() throws IOException {
         // Arrange
@@ -215,6 +221,85 @@ public class IngredientManagementTest {
         // Assert
         assertTrue(result);
 
+    }
+
+    @Test
+    public void testListIngredientsDLLNoIngredients() {
+        // Arrange
+        head = null;
+
+        // Act
+        boolean result = ingredientManagement.listIngredientsDLL(head);
+
+        // Assert
+        assertFalse(result);
+        String output = outContent.toString();
+        assertTrue(output.contains("No ingredients available."));
+    }
+
+    @Test
+    public void testListIngredientsXLLNoIngredients() {
+        // Arrange
+        head = null;
+
+        // Act
+        boolean result = ingredientManagement.listIngredientsXLL(head);
+
+        // Assert
+        assertFalse(result);
+        String output = outContent.toString();
+        assertTrue(output.contains("No ingredients available."));
+    }
+
+    @Test
+    public void testListIngredients() {
+        // Arrange
+        String userInput = "1\n";
+        ByteArrayInputStream inContent = new ByteArrayInputStream(userInput.getBytes());
+        System.setIn(inContent);
+        Scanner testScanner = new Scanner(inContent);
+        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
+
+        Ingredient firstIngredient = new Ingredient();
+        firstIngredient.setId(1);
+        firstIngredient.setName("Tomato");
+        firstIngredient.setPrice(2.0f);
+        firstIngredient.setPrev(null);
+        firstIngredient.setNext(null);
+        head = firstIngredient;
+
+        // Act
+        boolean result = ingredientManagement.listIngredients(head);
+
+        // Assert
+        assertTrue(result);
+        String output = outContent.toString();
+        assertTrue(output.contains("Available Ingredients (DLL):"));
+        //assertTrue(output.contains("ID: 1, Name: Tomato, Price: 2.00"));
+    }
+
+    @Test
+    public void testListIngredientsCase2() {
+        // Arrange
+        String userInput = "2\n";
+        ByteArrayInputStream inContent = new ByteArrayInputStream(userInput.getBytes());
+        System.setIn(inContent);
+        Scanner testScanner = new Scanner(inContent);
+        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
+
+        Ingredient firstIngredient = new Ingredient();
+        firstIngredient.setId(1);
+        firstIngredient.setName("Tomato");
+        firstIngredient.setPrice(2.0f);
+        firstIngredient.setPrev(null);
+        firstIngredient.setNext(null);
+        head = firstIngredient;
+
+        // Act
+        boolean result = ingredientManagement.listIngredients(head);
+
+        // Assert
+        assertTrue(result);
     }
 
 }
