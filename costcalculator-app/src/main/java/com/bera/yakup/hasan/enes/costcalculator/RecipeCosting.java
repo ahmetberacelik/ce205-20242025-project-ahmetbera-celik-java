@@ -343,3 +343,109 @@ public class RecipeCosting {
         out.printf("The total cost of the recipe '%s' is: %.2f TL%n", selectedRecipe.getName(), totalCost);
         userAuth.enterToContinue(); // Wait for user to continue
     }
+
+
+    /**
+     * @param pathFileRecipes File path to save the recipes.
+     * @param recipes         List of recipes to be saved.
+     * @throws IOException If an I/O error occurs during file writing.
+     * @brief Saves all recipes to a file.
+     */
+    public void saveRecipesToFile(String pathFileRecipes, List<Recipe> recipes) throws IOException {
+        File file = new File(pathFileRecipes);
+
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(file, true))) {
+            // Write each Recipe object to the file
+            for (Recipe recipe : recipes) {
+                writer.writeUTF(recipe.getName());
+                writer.writeInt(recipe.getCategory());
+                List<Integer> ingredients = recipe.getIngredients();
+                writer.writeInt(ingredients.size());
+                for (int ingredientId : ingredients) {
+                    writer.writeInt(ingredientId);
+                }
+            }
+        }
+    }
+    /**
+     * @brief Traverses the recipes using Breadth-First Search (BFS) to analyze ingredient usage.
+     *
+     * The method traverses all recipes in BFS order and computes the frequency of each ingredient
+     * used in the recipes.
+     *
+     * @param recipes The list of existing recipes.
+     */
+    public void traverseRecipesBFS(List<Recipe> recipes) {
+        if (recipes.isEmpty()) {
+            out.println("No recipes available.");
+            userAuth.enterToContinue();
+            return;
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+        Map<Integer, Map<Integer, Double>> ingredientUsage = new HashMap<>();
+
+        for (int i = 0; i < recipes.size(); i++) {
+            queue.add(i);
+        }
+
+        while (!queue.isEmpty()) {
+            int recipeId = queue.poll();
+            Recipe currentRecipe = recipes.get(recipeId);
+
+            for (int ingredientId : currentRecipe.getIngredients()) {
+                ingredientUsage
+                        .computeIfAbsent(recipeId, k -> new HashMap<>())
+                        .merge(ingredientId, 1.0, Double::sum);
+            }
+        }
+
+        ingredientUsage.forEach((recipeId, ingredients) -> {
+            ingredients.forEach((ingredientId, count) -> {
+                out.println("-------------------------------------------");
+                out.printf("Recipe %d uses Ingredient %d - %.2f times%n", recipeId + 1, ingredientId, count);
+                out.println("-------------------------------------------");
+            });
+        });
+    }
+    /**
+     * @brief Traverses the recipes using Depth-First Search (DFS) to analyze ingredient usage.
+     *
+     * The method traverses all recipes in DFS order and computes the frequency of each ingredient
+     * used in the recipes.
+     *
+     * @param recipes The list of existing recipes.
+     */
+    public void traverseRecipesDFS(List<Recipe> recipes) {
+        if (recipes.isEmpty()) {
+            out.println("No recipes available.");
+            userAuth.enterToContinue();
+            return;
+        }
+
+        Stack<Integer> stack = new Stack<>();
+        Map<Integer, Map<Integer, Double>> ingredientUsage = new HashMap<>();
+
+        for (int i = 0; i < recipes.size(); i++) {
+            stack.push(i);
+        }
+
+        while (!stack.isEmpty()) {
+            int recipeId = stack.pop();
+            Recipe currentRecipe = recipes.get(recipeId);
+
+            for (int ingredientId : currentRecipe.getIngredients()) {
+                ingredientUsage
+                        .computeIfAbsent(recipeId, k -> new HashMap<>())
+                        .merge(ingredientId, 1.0, Double::sum);
+            }
+        }
+
+        ingredientUsage.forEach((recipeId, ingredients) -> {
+            ingredients.forEach((ingredientId, count) -> {
+                out.println("-------------------------------------------");
+                out.printf("Recipe %d uses Ingredient %d - %.2f times%n", recipeId + 1, ingredientId, count);
+                out.println("-------------------------------------------");
+            });
+        });
+    }
