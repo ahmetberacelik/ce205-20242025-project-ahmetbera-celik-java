@@ -130,4 +130,80 @@ public class PriceAdjustment {
         }
     }
 
+
+    /**
+     * @param ingredients List of ingredients.
+     * @param n           Total number of ingredients.
+     * @brief Sorts the ingredients in descending order using Max Heap.
+     */
+    public void sortIngredientsMaxHeap(List<Ingredient> ingredients, int n) {
+        // Build heap (rearrange array)
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            heapify(ingredients, n, i);
+        }
+
+        // Extract elements from heap one by one
+        for (int i = n - 1; i > 0; i--) {
+            // Move current root to end
+            Ingredient temp = ingredients.get(0);
+            ingredients.set(0, ingredients.get(i));
+            ingredients.set(i, temp);
+
+            // Call max heapify on the reduced heap
+            heapify(ingredients, i, 0);
+        }
+    }
+
+    /**
+     * @param ingredients  List of ingredients.
+     * @param ingredientId The ID of the ingredient to search for.
+     * @return The ingredient if found, otherwise null.
+     * @brief Searches for an ingredient using linear probing.
+     */
+    public Ingredient linearProbingSearch(List<Ingredient> ingredients, int ingredientId) {
+        for (Ingredient ingredient : ingredients) {
+            if (ingredient.getId() == ingredientId) {
+                return ingredient;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param ingredients  List of ingredients.
+     * @param ingredientId The ID of the ingredient to search for.
+     * @return The ingredient if found, otherwise null.
+     * @brief Searches for an ingredient using quadratic probing.
+     */
+    public Ingredient quadraticProbingSearch(List<Ingredient> ingredients, int ingredientId) {
+        int totalIngredient = ingredients.size();
+        int startIdx = ingredientId % totalIngredient;
+        for (int i = 0; i < totalIngredient; i++) {
+            int index = (startIdx + i * i) % totalIngredient;
+            if (ingredients.get(index).getId() == ingredientId) {
+                return ingredients.get(index);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param ingredients  List of ingredients.
+     * @param ingredientId The ID of the ingredient to search for.
+     * @return The ingredient if found, otherwise null.
+     * @brief Searches for an ingredient using double hashing.
+     */
+    public Ingredient doubleHashingSearch(List<Ingredient> ingredients, int ingredientId) {
+        int totalIngredient = ingredients.size();
+        int hash1 = ingredientId % totalIngredient;
+        int hash2 = 1 + (ingredientId % (totalIngredient - 1));
+        for (int i = 0; i < totalIngredient; i++) {
+            int index = (hash1 + i * hash2) % totalIngredient;
+            if (ingredients.get(index).getId() == ingredientId) {
+                return ingredients.get(index);
+            }
+        }
+        return null;
+    }
+
 }
