@@ -1,15 +1,15 @@
 /**
 
-@file CalculatorApp.java
-@brief This file serves as the main application file for the Calculator App.
-@details This file contains the entry point of the application, which is the main method. It initializes the necessary components and executes the Calculator App.
+@file CostcalculatorApp.java
+@brief This file serves as the main application file for the Costcalculator App.
+@details This file contains the entry point of the application, which is the main method. It initializes the necessary components and executes the Costcalculator App.
 */
 /**
 
-@package com.ucoruh.calculator
-@brief The com.ucoruh.calculator package contains all the classes and files related to the Calculator App.
+@package com.bera.yakup.hasan.enes.costcalculator
+@brief The com.bera.yakup.hasan.enes.costcalculator package contains all the classes and files related to the Costcalculator App.
 */
-package com.ucoruh.calculator;
+package com.bera.yakup.hasan.enes.costcalculator;
 
 import java.io.IOException;
 
@@ -19,24 +19,24 @@ import ch.qos.logback.classic.Logger;
 
 /**
  *
- * @class CalculatorApp
- * @brief This class represents the main application class for the Calculator
+ * @class CostcalculatorApp
+ * @brief This class represents the main application class for the Costcalculator
  *        App.
- * @details The CalculatorApp class provides the entry point for the Calculator
+ * @details The CostcalculatorApp class provides the entry point for the Costcalculator
  *          App. It initializes the necessary components, performs calculations,
  *          and handles exceptions.
  * @author ugur.coruh
  */
-public class CalculatorApp {
+public class CostcalculatorApp {
   /**
-   * @brief Logger for the CalculatorApp class.
+   * @brief Logger for the CostcalculatorApp class.
    */
-  private static final Logger logger = (Logger) LoggerFactory.getLogger(CalculatorApp.class);
+  private static final Logger logger = (Logger) LoggerFactory.getLogger(CostcalculatorApp.class);
 
   /**
-   * @brief The main entry point of the Calculator App.
+   * @brief The main entry point of the Costcalculator App.
    *
-   * @details The main method is the starting point of the Calculator App. It
+   * @details The main method is the starting point of the Costcalculator App. It
    *          initializes the logger, performs logging, displays a greeting
    *          message, and handles user input.
    *

@@ -5,32 +5,48 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<!-- The Basics -->
-	<groupId>com.ucoruh.calculator</groupId>
-	<artifactId>calculator-app</artifactId>
+	<groupId>com.bera.yakup.hasan.enes.costcalculator</groupId>
+	<artifactId>costcalculator-app</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<!-- More Project Information -->
-	<name>calculator-app</name>
+	<name>costcalculator-app</name>
 	<url>https://github.com/ucoruh/eclipse-java-maven-template</url>
 	<scm>
 		<url>https://github.com/ucoruh/eclipse-java-maven-template</url>
 	</scm>
-	<inceptionYear>2023</inceptionYear>
+	<inceptionYear>2024</inceptionYear>
 	<developers>
 		<developer>
-			<name>Asst. Prof. Dr. Ugur CORUH</name>
+			<name>Ahmet Bera Celik</name>
 			<organization>RTEU</organization>
-			<email>ugur.coruh@erdogan.edu.tr</email>
+			<email>ahmetbera_celik22@erdogan.edu.tr</email>
 			<roles>
 				<role>Developer</role>
 				<role>Designer</role>
 			</roles>
 		</developer>
 		<developer>
-			<name>Other Person</name>
+			<name>Yakup Eroglu</name>
 			<organization>RTEU</organization>
-			<email>mail@gmail.com</email>
+			<email>yakup_eroglu22@erdogan.edu.tr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>Hasan Basri Taskin</name>
+			<organization>RTEU</organization>
+			<email>hasanbasri_taskin22@erdogan.edu.tr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</developer>
+		<developer>
+			<name>Enes Koy</name>
+			<organization>RTEU</organization>
+			<email>enes_koy22@erdogan.edu.tr</email>
 			<roles>
 				<role>Developer</role>
 			</roles>
@@ -38,8 +54,8 @@
 	</developers>
 	<contributors>
 		<contributor>
-			<name>Asst. Prof. Dr. Ugur CORUH</name>
-			<email>ugur.coruh@erdogan.edu.tr</email>
+			<name>Ahmet Bera Celik</name>
+			<email>ahmetbera_celik22@erdogan.edu.tr</email>
 			<organization>RTEU</organization>
 			<roles>
 				<role>Developer</role>
@@ -47,9 +63,25 @@
 			</roles>
 		</contributor>
 		<contributor>
-			<name>Other Person</name>
+			<name>Yakup Eroglu</name>
 			<organization>RTEU</organization>
-			<email>mail@gmail.com</email>
+			<email>hasanbasri_taskin22@erdogan.edu.tr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>Hasan Basri Taskin</name>
+			<organization>RTEU</organization>
+			<email>yakup_eroglu22@erdogan.edu.tr</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>Enes Koy</name>
+			<organization>RTEU</organization>
+			<email>enes_koy22@erdogan.edu.tr</email>
 			<roles>
 				<role>Developer</role>
 			</roles>
@@ -136,8 +168,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>9</source>
+					<target>9</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -145,8 +177,12 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<includes>
-						<include>**/CalculatorAppTest.java</include>
-						<include>**/CalculatorTest.java</include>
+						<include>**/CostcalculatorAppTest.java</include>
+						<include>**/UserAuthenticationTest.java</include>
+						<include>**/IngredientManagementTest.java</include>
+						<include>**/PriceAdjustmentTest.java</include>
+						<include>**/RecipeCostingTest.java</include>
+						<include>**/BudgetPlannerTest.java</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -250,7 +286,7 @@
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>
-										com.ucoruh.calculator.CalculatorApp</mainClass>
+										com.bera.yakup.hasan.enes.costcalculator.CostcalculatorApp</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>

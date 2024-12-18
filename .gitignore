@@ -494,6 +494,7 @@ tmp/
 *~.nib
 local.properties
 .settings/
+.idea/
 .loadpath
 .recommenders
 
@@ -570,6 +571,9 @@ local.properties
 *.zip
 *.tar.gz
 *.rar
+
+# Binary files
+*.bin
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -960,7 +964,7 @@ coverage*[.json, .xml, .info]
 
 # End of https://www.toptal.com/developers/gitignore/api/c,csharp,vs,visualstudio,visualstudiocode,java,maven,c++,cmake,eclipse,netbeans
 
-/calculator-app/src/site/markdown/readme.md
-/calculator-app/src/site/resources/assets/.gitkeep
-/calculator-app/src/site/resources/assets
-/calculator-app/src/site/resources/images/rteu_logo.jpg
+/costcalculator-app/src/site/markdown/readme.md
+/costcalculator-app/src/site/resources/assets/.gitkeep
+/costcalculator-app/src/site/resources/assets
+/costcalculator-app/src/site/resources/images/rteu_logo.jpg
