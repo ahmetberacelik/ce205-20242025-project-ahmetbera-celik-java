@@ -129,7 +129,7 @@ public class IngredientManagement {
         return head;
     }
 
-    public boolean saveIngredientsToFile(Ingredient head, String filePath) throws IOException{
+    public boolean saveIngredientsToFile(Ingredient head, String filePath) throws IOException {
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(filePath))) {
             Ingredient temp = head;
 
@@ -223,7 +223,7 @@ public class IngredientManagement {
         }
     }
 
-    public Ingredient loadIngredientsFromFile(String filePath) throws IOException{
+    public Ingredient loadIngredientsFromFile(String filePath) throws IOException {
         File file = new File(filePath);
         if (!file.exists()) {
             return null;
@@ -252,7 +252,7 @@ public class IngredientManagement {
         return head;
     }
 
-    public Ingredient removeIngredient(Ingredient head, int id, String filePath) throws IOException{
+    public Ingredient removeIngredient(Ingredient head, int id, String filePath) throws IOException {
         if (head == null) {
             out.println("No ingredients to remove.");
             return head;
@@ -288,7 +288,7 @@ public class IngredientManagement {
         return head;
     }
 
-    public Ingredient editIngredient(Ingredient head, String filePath) throws IOException{
+    public Ingredient editIngredient(Ingredient head, String filePath) throws IOException {
         if (head == null) {
             out.println("No ingredients available to edit.");
             return head;
@@ -414,6 +414,202 @@ public class IngredientManagement {
 
         if (!found) {
             out.printf("Ingredient '%s' not found in the list.\n", searchName);
+        }
+    }
+
+    public void printIngredientManagementMenu() {
+        out.println("\n+--------------------------------------+");
+        out.println("|       INGREDIENT MANAGEMENT MENU     |");
+        out.println("+--------------------------------------+");
+        out.println("| 1. View Ingredients                  |");
+        out.println("| 2. Add Ingredient                    |");
+        out.println("| 3. Remove Ingredient                 |");
+        out.println("| 4. Edit Ingredient                   |");
+        out.println("| 5. Search Ingredient by Name (KMP)   |");
+        out.println("| 6. Exit                              |");
+        out.println("+--------------------------------------+");
+        out.print("Please enter a number to select: ");
+    }
+
+    public void printIngredientViewMenu() {
+        out.println("+--------------------------------------+");
+        out.println("| 1. Next                              |");
+        out.println("| 2. Previous                          |");
+        out.println("| 3. Exit View                         |");
+        out.println("+--------------------------------------+");
+        out.print("Please enter a number to select: ");
+    }
+
+    public boolean ingredientManagementMenu(String filePath) throws IOException, InterruptedException {
+        Ingredient head = loadIngredientsFromFile(filePath);
+        while (true) {
+            userAuth.clearScreen();
+            printIngredientManagementMenu();
+            int choice = userAuth.getInput();
+
+            if (choice == -2) {
+                userAuth.handleInputError();
+                userAuth.enterToContinue();
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    // View Ingredients
+                    if (head == null) {
+                        out.println("No ingredients available.");
+                        userAuth.enterToContinue();
+                    } else {
+                        Ingredient current = head;
+                        while (true) {
+                            userAuth.clearScreen();
+                            out.println("Current Ingredient:");
+                            out.printf("ID: %d\n", current.getId());
+                            out.printf("Name: %s\n", current.getName());
+                            out.printf("Price: %.2f\n", current.getPrice());
+                            printIngredientViewMenu();
+                            int viewChoice = userAuth.getInput();
+
+                            if (viewChoice == -2) {
+                                userAuth.handleInputError();
+                                continue;
+                            }
+
+                            if (viewChoice == 1 && current.getNext() != null) {
+                                current = current.getNext();
+                            } else if (viewChoice == 2 && current.getPrev() != null) {
+                                current = current.getPrev();
+                            } else if (viewChoice == 3) {
+                                break;
+                            } else {
+                                out.println("Invalid choice or no more ingredients in that direction.");
+                                userAuth.enterToContinue();
+                            }
+                        }
+                    }
+                    break;
+
+                case 2:
+                    // Add Ingredient
+                    while (true) {
+                        try {
+                            userAuth.clearScreen();
+                            out.print("Enter ingredient name: ");
+                            String name = scanner.nextLine();
+
+                            if (name.isEmpty()) {
+                                out.println("Ingredient name cannot be empty. Please try again.");
+                                userAuth.enterToContinue();
+                                continue;
+                            }
+
+                            out.print("Enter ingredient price: ");
+                            float price = scanner.nextFloat();
+                            scanner.nextLine(); // Clear buffer
+
+                            if (price <= 0) {
+                                out.println("Price must be greater than zero. Please try again.");
+                                userAuth.enterToContinue();
+                                continue;
+                            }
+
+                            head = addIngredient(head, name, price, filePath);
+                            out.println("Ingredient added successfully.");
+                            userAuth.enterToContinue();
+                            break;
+                        } catch (InputMismatchException e) {
+                            out.println("Invalid input. Please enter a valid number for the price.");
+                            scanner.nextLine(); // Clear invalid input
+                            userAuth.enterToContinue();
+                        }
+                    }
+                    break;
+
+                case 3:
+                    // Remove Ingredient
+                    if (head == null) {
+                        out.println("No ingredients to remove.");
+                        userAuth.enterToContinue();
+                    } else {
+                        // Present the list type menu (DLL or XLL)
+                        userAuth.clearScreen();
+                        out.println("Choose list type to display:");
+                        out.println("1. DLL (Doubly Linked List)");
+                        out.println("2. XLL (Extended Linked List)");
+                        out.print("Enter your choice: ");
+                        int listChoice = userAuth.getInput();
+
+                        if (listChoice == -2) {
+                            userAuth.handleInputError();
+                            userAuth.enterToContinue();
+                            continue;
+                        }
+
+                        boolean displayed = false;
+                        switch (listChoice) {
+                            case 1:
+                                displayed = listIngredientsDLL(head);
+                                break;
+                            case 2:
+                                displayed = listIngredientsXLL(head);
+                                break;
+                            default:
+                                out.println("Invalid choice. Please try again.");
+                                userAuth.enterToContinue();
+                                continue;
+                        }
+
+                        if (!displayed) {
+                            userAuth.enterToContinue();
+                            continue;
+                        }
+
+                        // Prompt for the ID of the ingredient to remove
+                        out.print("Enter the ID of the ingredient to remove: ");
+                        int id = userAuth.getInput();
+
+                        if (id == -2) {
+                            userAuth.handleInputError();
+                            userAuth.enterToContinue();
+                            continue;
+                        }
+
+                        head = removeIngredient(head, id, filePath);
+                        out.println("Ingredient removed successfully.");
+                        userAuth.enterToContinue();
+                    }
+                    break;
+
+                case 4:
+                    // Edit Ingredient
+                    head = editIngredient(head, filePath);
+                    userAuth.enterToContinue();
+                    break;
+
+                case 5:
+                    // Search Ingredient by Name
+                    out.print("Enter the ingredient name to search: ");
+                    String searchName = scanner.nextLine();
+                    if (searchName.isEmpty()) {
+                        out.println("Search name cannot be empty.");
+                        userAuth.enterToContinue();
+                        continue;
+                    }
+                    searchIngredientByKMP(head, searchName);
+                    userAuth.enterToContinue();
+                    break;
+
+                case 6:
+                    // Exit
+                    saveIngredientsToFile(head, filePath);
+                    out.println("Exiting Ingredient Management Menu.");
+                    return true;
+
+                default:
+                    out.println("Invalid choice. Please try again.");
+                    userAuth.enterToContinue();
+                    break;
+            }
         }
     }
 
