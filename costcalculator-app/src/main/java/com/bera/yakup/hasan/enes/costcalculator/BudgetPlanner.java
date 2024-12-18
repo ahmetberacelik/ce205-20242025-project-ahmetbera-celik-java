@@ -79,3 +79,19 @@ public class BudgetPlanner {
 
         return 1;
     }
+
+    /**
+     * @brief Displays the current budget.
+     *
+     * @param budget Current budget value.
+     * @return Returns 1 after displaying the budget.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted.
+     */
+    public int viewBudget(double budget) throws IOException, InterruptedException {
+        userAuth.clearScreen();
+        out.println("\n=== Current Budget ===\n");
+        out.printf("Your current budget: %.2f TL\n\n", budget);
+        userAuth.enterToContinue();
+        return 1;
+    }
