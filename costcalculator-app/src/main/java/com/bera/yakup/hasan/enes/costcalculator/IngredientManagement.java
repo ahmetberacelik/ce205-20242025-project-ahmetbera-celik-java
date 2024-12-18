@@ -364,3 +364,374 @@ public class IngredientManagement {
         saveIngredientsToFile(head, filePath);
         return head;
     }
+    /**
+     * @brief Edits an existing ingredient in the linked list.
+     * @param head The head of the linked list.
+     * @param filePath The file path to save the updated list.
+     * @return The updated head of the linked list.
+     * @throws IOException If an I/O error occurs.
+     */
+    public Ingredient editIngredient(Ingredient head, String filePath) throws IOException{
+        if (head == null) {
+            out.println("No ingredients available to edit.");
+            return head;
+        }
+
+        // Display the list of ingredients
+        listIngredients(head);
+
+        // Prompt for the ID of the ingredient to edit
+        out.print("Enter the ID of the ingredient to edit: ");
+        int id;
+        try {
+            id = scanner.nextInt();
+        } catch (Exception e) {
+            out.println("Invalid input. Please enter a valid ID.");
+            scanner.nextLine(); // Clear invalid input
+            return head;
+        }
+
+        // Find the ingredient with the specified ID
+        Ingredient current = head;
+        while (current != null && current.getId() != id) {
+            current = current.getNext();
+        }
+
+        if (current == null) {
+            out.printf("Ingredient with ID %d not found.\n", id);
+            return head;
+        }
+
+        // Get the new name for the ingredient
+        scanner.nextLine(); // Clear the buffer
+        out.print("Enter the new name for the ingredient: ");
+        String newName = scanner.nextLine();
+
+        // Validate the new name
+        if (newName.matches(".*\\d.*") || newName.isEmpty()) {
+            out.println("Invalid ingredient name. Please enter a valid name without numbers.");
+            return head;
+        }
+
+        // Update the ingredient's name
+        current.setName(newName);
+        out.println("Ingredient name updated successfully.");
+
+        // Save updated ingredient list to file
+        saveIngredientsToFile(head, filePath);
+        return head;
+    }
+    /**
+     * @brief Computes the Longest Prefix Suffix (LPS) array for a given pattern.
+     *
+     * The LPS array is used by the KMP algorithm to skip unnecessary comparisons
+     * during the search process. It represents the longest proper prefix which
+     * is also a suffix for each substring of the pattern.
+     *
+     * @param pattern The pattern for which the LPS array is computed.
+     * @return An array representing the LPS values for the pattern.
+     */
+    public static int[] computeLPSArray(String pattern) {
+        int m = pattern.length();
+        int[] lps = new int[m];
+        int length = 0;
+        int i = 1;
+
+        lps[0] = 0;
+
+        while (i < m) {
+            if (pattern.charAt(i) == pattern.charAt(length)) {
+                length++;
+                lps[i] = length;
+                i++;
+            } else {
+                if (length != 0) {
+                    length = lps[length - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
+            }
+        }
+        return lps;
+    }
+    /**
+     * @brief Performs pattern matching in a given text using the KMP algorithm.
+     *
+     * This method searches for the presence of a pattern in a given text. It uses
+     * the precomputed LPS array to efficiently find the pattern without
+     * unnecessary comparisons.
+     *
+     * @param text The text to search within.
+     * @param pattern The pattern to search for.
+     * @return True if the pattern is found in the text, false otherwise.
+     */
+    public static boolean KMPSearch(String text, String pattern) {
+        int n = text.length();
+        int m = pattern.length();
+        int[] lps = computeLPSArray(pattern);
+
+        int i = 0; // index for text
+        int j = 0; // index for pattern
+
+        while (i < n) {
+            if (pattern.charAt(j) == text.charAt(i)) {
+                i++;
+                j++;
+            }
+
+            if (j == m) {
+                return true; // Pattern found
+            } else if (i < n && pattern.charAt(j) != text.charAt(i)) {
+                if (j != 0) {
+                    j = lps[j - 1];
+                } else {
+                    i++;
+                }
+            }
+        }
+        return false;
+    }
+    /**
+     * @brief Searches for an ingredient in the linked list by its name using the KMP algorithm.
+     * @param head The head of the linked list.
+     * @param searchName The name of the ingredient to search for.
+     */
+    public void searchIngredientByKMP(Ingredient head, String searchName) {
+        if (head == null) {
+            out.println("No ingredients available to search.");
+            return;
+        }
+
+        Ingredient current = head;
+        boolean found = false;
+
+        while (current != null) {
+            if (KMPAlgorithm.KMPSearch(current.getName(), searchName)) {
+                out.println("Ingredient found:");
+                out.printf("ID: %d\n", current.getId());
+                out.printf("Name: %s\n", current.getName());
+                out.printf("Price: %.2f\n", current.getPrice());
+                found = true;
+                break;
+            }
+            current = current.getNext();
+        }
+
+        if (!found) {
+            out.printf("Ingredient '%s' not found in the list.\n", searchName);
+        }
+    }
+    /**
+     * @brief Displays the ingredient management menu.
+     */
+    public void printIngredientManagementMenu() {
+        out.println("\n+--------------------------------------+");
+        out.println("|       INGREDIENT MANAGEMENT MENU     |");
+        out.println("+--------------------------------------+");
+        out.println("| 1. View Ingredients                  |");
+        out.println("| 2. Add Ingredient                    |");
+        out.println("| 3. Remove Ingredient                 |");
+        out.println("| 4. Edit Ingredient                   |");
+        out.println("| 5. Search Ingredient by Name (KMP)   |");
+        out.println("| 6. Exit                              |");
+        out.println("+--------------------------------------+");
+        out.print("Please enter a number to select: ");
+    }
+    /**
+     * @brief Displays the ingredient view menu.
+     */
+    public void printIngredientViewMenu() {
+        out.println("+--------------------------------------+");
+        out.println("| 1. Next                              |");
+        out.println("| 2. Previous                          |");
+        out.println("| 3. Exit View                         |");
+        out.println("+--------------------------------------+");
+        out.print("Please enter a number to select: ");
+    }
+    /**
+     * @brief Displays the ingredient management menu and handles user interactions.
+     *
+     * This method provides various options for managing ingredients, such as viewing,
+     * adding, removing, editing, and searching for ingredients. It also allows the
+     * user to exit the menu.
+     *
+     * @param filePath The file path for loading and saving ingredient data.
+     * @return True when the menu is exited successfully.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted during execution.
+     */
+    public boolean ingredientManagementMenu(String filePath) throws IOException, InterruptedException {
+        Ingredient head = loadIngredientsFromFile(filePath);
+        while (true) {
+            userAuth.clearScreen();
+            printIngredientManagementMenu();
+            int choice = userAuth.getInput();
+
+            if (choice == -2) {
+                userAuth.handleInputError();
+                userAuth.enterToContinue();
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    // View Ingredients
+                    if (head == null) {
+                        out.println("No ingredients available.");
+                        userAuth.enterToContinue();
+                    } else {
+                        Ingredient current = head;
+                        while (true) {
+                            userAuth.clearScreen();
+                            out.println("Current Ingredient:");
+                            out.printf("ID: %d\n", current.getId());
+                            out.printf("Name: %s\n", current.getName());
+                            out.printf("Price: %.2f\n", current.getPrice());
+                            printIngredientViewMenu();
+                            int viewChoice = userAuth.getInput();
+
+                            if (viewChoice == -2) {
+                                userAuth.handleInputError();
+                                continue;
+                            }
+
+                            if (viewChoice == 1 && current.getNext() != null) {
+                                current = current.getNext();
+                            } else if (viewChoice == 2 && current.getPrev() != null) {
+                                current = current.getPrev();
+                            } else if (viewChoice == 3) {
+                                break;
+                            } else {
+                                out.println("Invalid choice or no more ingredients in that direction.");
+                                userAuth.enterToContinue();
+                            }
+                        }
+                    }
+                    break;
+
+                case 2:
+                    // Add Ingredient
+                    while (true) {
+                        try {
+                            userAuth.clearScreen();
+                            out.print("Enter ingredient name: ");
+                            String name = scanner.nextLine();
+
+                            if (name.isEmpty()) {
+                                out.println("Ingredient name cannot be empty. Please try again.");
+                                userAuth.enterToContinue();
+                                continue;
+                            }
+
+                            out.print("Enter ingredient price: ");
+                            float price = scanner.nextFloat();
+                            scanner.nextLine(); // Clear buffer
+
+                            if (price <= 0) {
+                                out.println("Price must be greater than zero. Please try again.");
+                                userAuth.enterToContinue();
+                                continue;
+                            }
+
+                            head = addIngredient(head, name, price, filePath);
+                            out.println("Ingredient added successfully.");
+                            userAuth.enterToContinue();
+                            break;
+                        } catch (InputMismatchException e) {
+                            out.println("Invalid input. Please enter a valid number for the price.");
+                            scanner.nextLine(); // Clear invalid input
+                            userAuth.enterToContinue();
+                        }
+                    }
+                    break;
+
+                case 3:
+                    // Remove Ingredient
+                    if (head == null) {
+                        out.println("No ingredients to remove.");
+                        userAuth.enterToContinue();
+                    } else {
+                        // Present the list type menu (DLL or XLL)
+                        userAuth.clearScreen();
+                        out.println("Choose list type to display:");
+                        out.println("1. DLL (Doubly Linked List)");
+                        out.println("2. XLL (Extended Linked List)");
+                        out.print("Enter your choice: ");
+                        int listChoice = userAuth.getInput();
+
+                        if (listChoice == -2) {
+                            userAuth.handleInputError();
+                            userAuth.enterToContinue();
+                            continue;
+                        }
+
+                        boolean displayed = false;
+                        switch (listChoice) {
+                            case 1:
+                                displayed = listIngredientsDLL(head);
+                                break;
+                            case 2:
+                                displayed = listIngredientsXLL(head);
+                                break;
+                            default:
+                                out.println("Invalid choice. Please try again.");
+                                userAuth.enterToContinue();
+                                continue;
+                        }
+
+                        if (!displayed) {
+                            userAuth.enterToContinue();
+                            continue;
+                        }
+
+                        // Prompt for the ID of the ingredient to remove
+                        out.print("Enter the ID of the ingredient to remove: ");
+                        int id = userAuth.getInput();
+
+                        if (id == -2) {
+                            userAuth.handleInputError();
+                            userAuth.enterToContinue();
+                            continue;
+                        }
+
+                        head = removeIngredient(head, id, filePath);
+                        out.println("Ingredient removed successfully.");
+                        userAuth.enterToContinue();
+                    }
+                    break;
+
+                case 4:
+                    // Edit Ingredient
+                    head = editIngredient(head, filePath);
+                    userAuth.enterToContinue();
+                    break;
+
+                case 5:
+                    // Search Ingredient by Name
+                    out.print("Enter the ingredient name to search: ");
+                    String searchName = scanner.nextLine();
+                    if (searchName.isEmpty()) {
+                        out.println("Search name cannot be empty.");
+                        userAuth.enterToContinue();
+                        continue;
+                    }
+                    searchIngredientByKMP(head, searchName);
+                    userAuth.enterToContinue();
+                    break;
+
+                case 6:
+                    // Exit
+                    saveIngredientsToFile(head, filePath);
+                    out.println("Exiting Ingredient Management Menu.");
+                    return true;
+
+                default:
+                    out.println("Invalid choice. Please try again.");
+                    userAuth.enterToContinue();
+                    break;
+            }
+        }
+    }
+
+}
