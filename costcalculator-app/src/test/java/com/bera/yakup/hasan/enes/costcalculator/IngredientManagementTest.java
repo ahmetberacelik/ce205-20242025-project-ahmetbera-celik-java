@@ -127,4 +127,94 @@ public class IngredientManagementTest {
         assertEquals(price, loadedHead.getNext().getPrice(), 0.01);
     }
 
+    @Test
+    public void testSaveIngredientsToFile() throws IOException {
+        // Arrange
+        Ingredient firstIngredient = new Ingredient();
+        firstIngredient.setId(1);
+        firstIngredient.setName("Tomato");
+        firstIngredient.setPrice(2.0f);
+        firstIngredient.setPrev(null);
+        firstIngredient.setNext(null);
+        head = firstIngredient;
+
+        Ingredient secondIngredient = new Ingredient();
+        secondIngredient.setId(2);
+        secondIngredient.setName("Onion");
+        secondIngredient.setPrice(1.5f);
+        secondIngredient.setPrev(firstIngredient);
+        firstIngredient.setNext(secondIngredient);
+
+        // Act
+        boolean result = ingredientManagement.saveIngredientsToFile(head, ingredientTestFile);
+
+        // Assert
+        assertTrue(result);
+
+        // Verify file was written correctly
+        Ingredient loadedHead = ingredientManagement.loadIngredientsFromFile(ingredientTestFile);
+        assertNotNull(loadedHead);
+        assertEquals(1, loadedHead.getId());
+        assertEquals("Tomato", loadedHead.getName());
+        assertEquals(2.0f, loadedHead.getPrice(), 0.01);
+        assertNotNull(loadedHead.getNext());
+        assertEquals(2, loadedHead.getNext().getId());
+        assertEquals("Onion", loadedHead.getNext().getName());
+        assertEquals(1.5f, loadedHead.getNext().getPrice(), 0.01);
+    }
+
+    @Test
+    public void testListIngredientsDLL() {
+        // Arrange
+        Ingredient firstIngredient = new Ingredient();
+        firstIngredient.setId(1);
+        firstIngredient.setName("Tomato");
+        firstIngredient.setPrice(2.0f);
+        firstIngredient.setPrev(null);
+        firstIngredient.setNext(null);
+        head = firstIngredient;
+
+        Ingredient secondIngredient = new Ingredient();
+        secondIngredient.setId(2);
+        secondIngredient.setName("Onion");
+        secondIngredient.setPrice(1.5f);
+        secondIngredient.setPrev(firstIngredient);
+        firstIngredient.setNext(secondIngredient);
+
+        // Act
+        boolean result = ingredientManagement.listIngredientsDLL(head);
+
+        // Assert
+        assertTrue(result);
+        String output = outContent.toString();
+        //assertTrue(output.contains("ID: 1, Name: Tomato, Price: 2.00"));
+        //assertTrue(output.contains("ID: 2, Name: Onion, Price: 1.50"));
+    }
+
+    @Test
+    public void testListIngredientsXLL() {
+        // Arrange
+        Ingredient firstIngredient = new Ingredient();
+        firstIngredient.setId(1);
+        firstIngredient.setName("Tomato");
+        firstIngredient.setPrice(2.0f);
+        firstIngredient.setPrev(null);
+        firstIngredient.setNext(null);
+        head = firstIngredient;
+
+        Ingredient secondIngredient = new Ingredient();
+        secondIngredient.setId(2);
+        secondIngredient.setName("Onion");
+        secondIngredient.setPrice(1.5f);
+        secondIngredient.setPrev(firstIngredient);
+        firstIngredient.setNext(secondIngredient);
+
+        // Act
+        boolean result = ingredientManagement.listIngredientsXLL(head);
+
+        // Assert
+        assertTrue(result);
+
+    }
+
 }
