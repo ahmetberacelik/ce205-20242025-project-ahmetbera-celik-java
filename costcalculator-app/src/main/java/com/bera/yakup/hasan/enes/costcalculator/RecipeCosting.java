@@ -271,3 +271,75 @@ public class RecipeCosting {
         saveRecipesToFile(pathFileRecipes, recipes);
         System.out.println("Recipe updated successfully!");
     }
+
+    /**
+     * @brief Calculates the total cost of a specific recipe.
+     *
+     * The method uses a sparse matrix to store ingredient prices, calculates the total cost
+     * of the recipe by summing the prices of its ingredients, and prints the sparse matrix
+     * representation for debugging purposes.
+     *
+     * @param recipes The list of existing recipes.
+     * @param pathFileIngredients Path to the file containing ingredients.
+     * @param pathFileRecipes Path to the file where recipes are saved.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the thread is interrupted.
+     */
+    public void calculateRecipeCost(List<Recipe> recipes, String pathFileIngredients, String pathFileRecipes) throws IOException, InterruptedException {
+        if (recipes.isEmpty()) {
+            out.println("No recipes available to calculate cost.");
+            userAuth.enterToContinue(); // Wait for user to continue
+            return;
+        }
+
+        userAuth.clearScreen(); // Clear the console
+        out.println("Available Recipes:");
+        for (int i = 0; i < recipes.size(); i++) {
+            out.printf("%d) %s%n", i + 1, recipes.get(i).getName());
+        }
+
+        out.println("Enter the ID of the recipe to calculate cost: ");
+        int recipeId = userAuth.getInput(); // Get user input for recipe ID
+
+        if (recipeId == -2) { // Invalid input check
+            userAuth.handleInputError(); // Display error message for invalid input
+            userAuth.enterToContinue(); // Wait for user to continue
+            return;
+        }
+
+        if (recipeId < 1 || recipeId > recipes.size()) { // Check if the recipe ID is valid
+            out.println("Invalid recipe ID.");
+            userAuth.enterToContinue(); // Wait for user to continue
+            return;
+        }
+
+        Recipe selectedRecipe = recipes.get(recipeId - 1);
+
+        // Sparse matrix to store ingredients and their prices
+        SparseMatrix sparseMatrix = new SparseMatrix();
+        List<Ingredient> ingredients = priceAdjustment.convertDoubleLinkToArray(pathFileIngredients); // Load ingredients
+
+        double totalCost = 0.0;
+
+        // Populate the sparse matrix with ingredient prices
+        for (int ingredientId : selectedRecipe.getIngredients()) {
+            Optional<Ingredient> ingredient = ingredients.stream()
+                    .filter(ing -> ing.getId() == ingredientId)
+                    .findFirst();
+
+            if (ingredient.isPresent()) {
+                Ingredient ing = ingredient.get();
+                sparseMatrix.insert(selectedRecipe.getIngredients().indexOf(ingredientId), ing.getId(), ing.getPrice());
+                totalCost += ing.getPrice();
+            } else {
+                out.printf("Warning: Ingredient ID %d not found.%n", ingredientId);
+            }
+        }
+
+        // Print sparse matrix for debugging purposes
+        out.println("Sparse Matrix Representation of Recipe Ingredients:");
+        sparseMatrix.printMatrix();
+
+        out.printf("The total cost of the recipe '%s' is: %.2f TL%n", selectedRecipe.getName(), totalCost);
+        userAuth.enterToContinue(); // Wait for user to continue
+    }
