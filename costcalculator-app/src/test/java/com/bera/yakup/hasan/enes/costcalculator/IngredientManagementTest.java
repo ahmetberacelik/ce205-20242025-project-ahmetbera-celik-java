@@ -661,3 +661,197 @@ public class IngredientManagementTest {
         assertTrue(result);
 
     }
+
+    @Test
+    public void testIngredientManagementMenuViewIngredientsEmpty() throws IOException, InterruptedException {
+        // Arrange
+        head = null;
+        ingredientManagement.saveIngredientsToFile(head, ingredientTestFile);
+
+        String userInput = "1\n\n6\n"; // Attempt to view ingredients and then exit
+        ByteArrayInputStream inContent = new ByteArrayInputStream(userInput.getBytes());
+        System.setIn(inContent);
+        Scanner testScanner = new Scanner(inContent);
+        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
+
+        // Act
+        boolean result = ingredientManagement.ingredientManagementMenu(ingredientTestFile);
+
+        // Assert
+        assertTrue(result);
+        String output = outContent.toString();
+        assertTrue(output.contains("No ingredients available."));
+    }
+
+    @Test
+    public void testIngredientManagementMenuNavigateIngredients() throws IOException, InterruptedException {
+        // Arrange
+        Ingredient firstIngredient = new Ingredient();
+        firstIngredient.setId(1);
+        firstIngredient.setName("Tomato");
+        firstIngredient.setPrice(2.0f);
+        firstIngredient.setPrev(null);
+        Ingredient secondIngredient = new Ingredient();
+        secondIngredient.setId(2);
+        secondIngredient.setName("Onion");
+        secondIngredient.setPrice(1.5f);
+        firstIngredient.setNext(secondIngredient);
+        secondIngredient.setPrev(firstIngredient);
+        secondIngredient.setNext(null);
+        head = firstIngredient;
+        ingredientManagement.saveIngredientsToFile(head, ingredientTestFile);
+
+        String userInput = "1\n1\n2\n3\n6\n"; // View first ingredient, navigate to next, then previous, then exit
+        ByteArrayInputStream inContent = new ByteArrayInputStream(userInput.getBytes());
+        System.setIn(inContent);
+        Scanner testScanner = new Scanner(inContent);
+        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
+
+        // Act
+        boolean result = ingredientManagement.ingredientManagementMenu(ingredientTestFile);
+
+        // Assert
+        assertTrue(result);
+        String output = outContent.toString();
+        assertTrue(output.contains("Current Ingredient:"));
+        assertTrue(output.contains("ID: 1"));
+        assertTrue(output.contains("Name: Tomato"));
+        //assertTrue(output.contains("Price: 2.00"));
+        assertTrue(output.contains("ID: 2"));
+        assertTrue(output.contains("Name: Onion"));
+        //assertTrue(output.contains("Price: 1.50"));
+    }
+    @Test
+    public void testComputeLPSArray() {
+        // Arrange
+        String pattern = "ABABAC";
+
+        // Act
+        int[] lps = IngredientManagement.computeLPSArray(pattern);
+
+        // Assert
+        int[] expectedLPS = {0, 0, 1, 2, 3, 0};
+        assertArrayEquals(expectedLPS, lps);
+    }
+
+    @Test
+    public void testKMPSearchPatternFound() {
+        // Arrange
+        String text = "ABABDABACDABABCABAB";
+        String pattern = "ABABCABAB";
+
+        // Act
+        boolean result = IngredientManagement.KMPSearch(text, pattern);
+
+        // Assert
+        assertTrue(result);
+    }
+
+    @Test
+    public void testKMPSearchPatternNotFound() {
+        // Arrange
+        String text = "ABABDABACDABABCABAB";
+        String pattern = "ABABAC";
+
+        // Act
+        boolean result = IngredientManagement.KMPSearch(text, pattern);
+
+        // Assert
+        assertFalse(result);
+    }
+
+    @Test
+    public void testSearchIngredientByKMPIngredientFound() throws IOException {
+        // Arrange
+        Ingredient firstIngredient = new Ingredient();
+        firstIngredient.setId(1);
+        firstIngredient.setName("Tomato");
+        firstIngredient.setPrice(2.0f);
+        firstIngredient.setPrev(null);
+        firstIngredient.setNext(null);
+        head = firstIngredient;
+        ingredientManagement.saveIngredientsToFile(head, ingredientTestFile);
+
+        // Act
+        ingredientManagement.searchIngredientByKMP(head, "Tomato");
+
+        // Assert
+        String output = outContent.toString();
+        assertTrue(output.contains("Ingredient found:"));
+        assertTrue(output.contains("ID: 1"));
+        assertTrue(output.contains("Name: Tomato"));
+        //assertTrue(output.contains("Price: 2.00"));
+    }
+
+    @Test
+    public void testSearchIngredientByKMPIngredientNotFound() throws IOException {
+        // Arrange
+        Ingredient firstIngredient = new Ingredient();
+        firstIngredient.setId(1);
+        firstIngredient.setName("Tomato");
+        firstIngredient.setPrice(2.0f);
+        firstIngredient.setPrev(null);
+        firstIngredient.setNext(null);
+        head = firstIngredient;
+        ingredientManagement.saveIngredientsToFile(head, ingredientTestFile);
+
+        // Act
+        ingredientManagement.searchIngredientByKMP(head, "Onion");
+
+        // Assert
+        String output = outContent.toString();
+        assertTrue(output.contains("Ingredient 'Onion' not found in the list."));
+    }
+
+    @Test
+    public void testSearchIngredientByKMPNoIngredients() throws IOException {
+        // Arrange
+        head = null;
+
+        // Act
+        ingredientManagement.searchIngredientByKMP(head, "Tomato");
+
+        // Assert
+        String output = outContent.toString();
+        assertTrue(output.contains("No ingredients available to search."));
+    }
+    @Test
+    public void testAddIngredientValidInput() throws IOException, InterruptedException {
+        // Arrange
+        String userInput = "2\nOnion\n1.5\n\n6\n"; // Add valid ingredient and exit
+        ByteArrayInputStream inContent = new ByteArrayInputStream(userInput.getBytes());
+        System.setIn(inContent);
+        Scanner testScanner = new Scanner(inContent);
+        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
+
+        // Act
+        boolean result = ingredientManagement.ingredientManagementMenu(ingredientTestFile);
+
+        // Assert
+        assertTrue(result);
+        String output = outContent.toString();
+        assertTrue(output.contains("Ingredient added successfully."));
+        // Verify the ingredient was saved
+        Ingredient loadedHead = ingredientManagement.loadIngredientsFromFile(ingredientTestFile);
+        assertNotNull(loadedHead);
+        assertEquals("Onion", loadedHead.getName());
+        assertEquals(1.5f, loadedHead.getPrice(), 0.01);
+    }
+
+    @Test
+    public void testAddIngredientEmptyName() throws IOException, InterruptedException {
+        // Arrange
+        String userInput = "2\n\n\nOnion\n1.5\n\n6\n"; // Enter empty name, then valid inputs and exit
+        ByteArrayInputStream inContent = new ByteArrayInputStream(userInput.getBytes());
+        System.setIn(inContent);
+        Scanner testScanner = new Scanner(inContent);
+        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
+
+        // Act
+        boolean result = ingredientManagement.ingredientManagementMenu(ingredientTestFile);
+
+        // Assert
+        assertTrue(result);
+        String output = outContent.toString();
+        assertTrue(output.contains("Ingredient name cannot be empty. Please try again."));
+    }
