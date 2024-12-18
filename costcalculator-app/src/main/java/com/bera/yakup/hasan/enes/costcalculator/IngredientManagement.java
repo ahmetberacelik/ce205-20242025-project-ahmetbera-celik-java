@@ -194,4 +194,149 @@ public class IngredientManagement {
         return true;
     }
 
+    public boolean listIngredients(Ingredient head) {
+        out.println("+--------------------------------------+");
+        out.println("|            LIST TYPE MENU            |");
+        out.println("+--------------------------------------+");
+        out.println("| 1. DLL (Doubly Linked List)          |");
+        out.println("| 2. XLL (Extended Linked List)        |");
+        out.println("+--------------------------------------+");
+        out.print("Enter your choice: ");
+
+        int choice;
+        try {
+            choice = scanner.nextInt();
+        } catch (Exception e) {
+            out.println("Invalid input. Please enter a number.");
+            scanner.nextLine(); // Clear invalid input
+            return false;
+        }
+
+        switch (choice) {
+            case 1:
+                return listIngredientsDLL(head);
+            case 2:
+                return listIngredientsXLL(head);
+            default:
+                out.println("Invalid choice. Please try again.");
+                return false;
+        }
+    }
+
+    public Ingredient loadIngredientsFromFile(String filePath) throws IOException{
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return null;
+        }
+
+        Ingredient head = null;
+        Ingredient tail = null;
+
+        try (DataInputStream in = new DataInputStream(new FileInputStream(filePath))) {
+            while (in.available() > 0) {
+                Ingredient newIngredient = new Ingredient();
+                newIngredient.setId(in.readInt());
+                newIngredient.setName(in.readUTF());
+                newIngredient.setPrice(in.readFloat());
+                newIngredient.setPrev(tail);
+                newIngredient.setNext(null);
+
+                if (head == null) {
+                    head = newIngredient;
+                } else {
+                    tail.setNext(newIngredient);
+                }
+                tail = newIngredient;
+            }
+        }
+        return head;
+    }
+
+    public Ingredient removeIngredient(Ingredient head, int id, String filePath) throws IOException{
+        if (head == null) {
+            out.println("No ingredients to remove.");
+            return head;
+        }
+
+        Ingredient current = head;
+
+        // Find the ingredient with the specified ID
+        while (current != null && current.getId() != id) {
+            current = current.getNext();
+        }
+
+        if (current == null) {
+            out.printf("Ingredient with ID %d not found.\n", id);
+            return head;
+        }
+
+        // Remove the ingredient from the list
+        if (current.getPrev() != null) {
+            current.getPrev().setNext(current.getNext());
+        } else {
+            head = current.getNext();
+        }
+
+        if (current.getNext() != null) {
+            current.getNext().setPrev(current.getPrev());
+        }
+
+        out.printf("Ingredient with ID %d removed successfully.\n", id);
+
+        // Save updated list to file
+        saveIngredientsToFile(head, filePath);
+        return head;
+    }
+
+    public Ingredient editIngredient(Ingredient head, String filePath) throws IOException{
+        if (head == null) {
+            out.println("No ingredients available to edit.");
+            return head;
+        }
+
+        // Display the list of ingredients
+        listIngredients(head);
+
+        // Prompt for the ID of the ingredient to edit
+        out.print("Enter the ID of the ingredient to edit: ");
+        int id;
+        try {
+            id = scanner.nextInt();
+        } catch (Exception e) {
+            out.println("Invalid input. Please enter a valid ID.");
+            scanner.nextLine(); // Clear invalid input
+            return head;
+        }
+
+        // Find the ingredient with the specified ID
+        Ingredient current = head;
+        while (current != null && current.getId() != id) {
+            current = current.getNext();
+        }
+
+        if (current == null) {
+            out.printf("Ingredient with ID %d not found.\n", id);
+            return head;
+        }
+
+        // Get the new name for the ingredient
+        scanner.nextLine(); // Clear the buffer
+        out.print("Enter the new name for the ingredient: ");
+        String newName = scanner.nextLine();
+
+        // Validate the new name
+        if (newName.matches(".*\\d.*") || newName.isEmpty()) {
+            out.println("Invalid ingredient name. Please enter a valid name without numbers.");
+            return head;
+        }
+
+        // Update the ingredient's name
+        current.setName(newName);
+        out.println("Ingredient name updated successfully.");
+
+        // Save updated ingredient list to file
+        saveIngredientsToFile(head, filePath);
+        return head;
+    }
+
 }
