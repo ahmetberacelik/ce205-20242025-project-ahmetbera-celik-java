@@ -206,4 +206,86 @@ public class PriceAdjustment {
         return null;
     }
 
+
+    /**
+     * @param ingredients  List of ingredients.
+     * @param ingredientId The ID of the ingredient to search for.
+     * @return The ingredient if found, otherwise null.
+     * @brief Searches for an ingredient using progressive overflow.
+     */
+    public Ingredient progressiveOverflowSearch(List<Ingredient> ingredients, int ingredientId) {
+        int totalIngredient = ingredients.size();
+        int startIdx = ingredientId % totalIngredient;
+        for (int i = 0; i < totalIngredient; i++) {
+            int index = (startIdx + i) % totalIngredient;
+            if (ingredients.get(index).getId() == ingredientId) {
+                return ingredients.get(index);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param ingredients  List of ingredients.
+     * @param ingredientId The ID of the ingredient to search for.
+     * @param c            The increment value for linear quotient.
+     * @return The ingredient if found, otherwise null.
+     * @brief Searches for an ingredient using linear quotient.
+     */
+    public Ingredient linearQuotientSearch(List<Ingredient> ingredients, int ingredientId, int c) {
+        int totalIngredient = ingredients.size();
+        int startIdx = ingredientId % totalIngredient;
+        for (int i = 0; i < totalIngredient; i++) {
+            int index = (startIdx + i * c) % totalIngredient;
+            if (ingredients.get(index).getId() == ingredientId) {
+                return ingredients.get(index);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param ingredients  List of ingredients.
+     * @param ingredientId The ID of the ingredient to search for.
+     * @return The ingredient if found, otherwise null.
+     * @brief Searches for an ingredient using Brent's method.
+     */
+    public Ingredient brentMethodSearch(List<Ingredient> ingredients, int ingredientId) {
+        int totalIngredient = ingredients.size();
+        int hash1 = ingredientId % totalIngredient;
+        int hash2 = 1 + (ingredientId % (totalIngredient - 1));
+        int bestIndex = hash1;
+        for (int i = 0; i < totalIngredient; i++) {
+            int index = (hash1 + i * hash2) % totalIngredient;
+            if (ingredients.get(index).getId() == ingredientId) {
+                return ingredients.get(index);
+            }
+            // Brent's Method: swap if we find a shorter path
+            if (i < (bestIndex - hash1 + totalIngredient) % totalIngredient) {
+                bestIndex = index;
+            }
+        }
+        return (ingredients.get(bestIndex).getId() == ingredientId) ? ingredients.get(bestIndex) : null;
+    }
+
+
+    /**
+     * @param buckets      List of buckets.
+     * @param ingredientId The ID of the ingredient to search for.
+     * @return The ingredient if found, otherwise null.
+     * @brief Searches for an ingredient within a bucket.
+     */
+    public Ingredient bucketSearch(List<Bucket> buckets, int ingredientId) {
+        int bucketSize = buckets.size();
+        int bucketIndex = ingredientId % bucketSize;
+        Ingredient current = buckets.get(bucketIndex).getHead();
+        while (current != null) {
+            if (current.getId() == ingredientId) {
+                return current;
+            }
+            current = current.getNext();
+        }
+        return null;
+    }
+
 }
