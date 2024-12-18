@@ -339,4 +339,82 @@ public class IngredientManagement {
         return head;
     }
 
+    public static int[] computeLPSArray(String pattern) {
+        int m = pattern.length();
+        int[] lps = new int[m];
+        int length = 0;
+        int i = 1;
+
+        lps[0] = 0;
+
+        while (i < m) {
+            if (pattern.charAt(i) == pattern.charAt(length)) {
+                length++;
+                lps[i] = length;
+                i++;
+            } else {
+                if (length != 0) {
+                    length = lps[length - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
+            }
+        }
+        return lps;
+    }
+
+    public static boolean KMPSearch(String text, String pattern) {
+        int n = text.length();
+        int m = pattern.length();
+        int[] lps = computeLPSArray(pattern);
+
+        int i = 0; // index for text
+        int j = 0; // index for pattern
+
+        while (i < n) {
+            if (pattern.charAt(j) == text.charAt(i)) {
+                i++;
+                j++;
+            }
+
+            if (j == m) {
+                return true; // Pattern found
+            } else if (i < n && pattern.charAt(j) != text.charAt(i)) {
+                if (j != 0) {
+                    j = lps[j - 1];
+                } else {
+                    i++;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void searchIngredientByKMP(Ingredient head, String searchName) {
+        if (head == null) {
+            out.println("No ingredients available to search.");
+            return;
+        }
+
+        Ingredient current = head;
+        boolean found = false;
+
+        while (current != null) {
+            if (KMPAlgorithm.KMPSearch(current.getName(), searchName)) {
+                out.println("Ingredient found:");
+                out.printf("ID: %d\n", current.getId());
+                out.printf("Name: %s\n", current.getName());
+                out.printf("Price: %.2f\n", current.getPrice());
+                found = true;
+                break;
+            }
+            current = current.getNext();
+        }
+
+        if (!found) {
+            out.printf("Ingredient '%s' not found in the list.\n", searchName);
+        }
+    }
+
 }
