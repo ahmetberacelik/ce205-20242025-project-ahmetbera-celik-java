@@ -17,26 +17,23 @@ public class IngredientManagementTest {
 
     private Ingredient head;
     private String ingredientTestFile = "ingredientTestFile.bin";
-
     /**
-     * @throws Exception
      * @brief This method is executed once before all test methods.
+     * @throws Exception
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     }
-
     /**
-     * @throws Exception
      * @brief This method is executed once after all test methods.
+     * @throws Exception
      */
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
     }
-
     /**
-     * @throws Exception
      * @brief This method is executed before each test method.
+     * @throws Exception
      */
     @Before
     public void setUp() throws Exception {
@@ -44,10 +41,9 @@ public class IngredientManagementTest {
         Scanner testScanner = new Scanner(System.in);
         ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
     }
-
     /**
-     * @throws Exception
      * @brief This method is executed after each test method.
+     * @throws Exception
      */
     @After
     public void tearDown() throws Exception {
@@ -55,18 +51,16 @@ public class IngredientManagementTest {
         System.setIn(originalIn);
         deleteFile(ingredientTestFile);
     }
-
     @Test
     public void exitingredientManagementMenuTest() throws IOException, InterruptedException {
         String testInput = "6\n";
         ByteArrayInputStream inContent = new ByteArrayInputStream(testInput.getBytes());
         Scanner testScanner = new Scanner(inContent);
-        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner, System.out);
+        ingredientManagement = new IngredientManagement(new UserAuthentication(testScanner, System.out), testScanner,System.out);
 
         boolean result = ingredientManagement.ingredientManagementMenu(ingredientTestFile);
         assertTrue(result);
     }
-
     @Test
     public void testAddIngredient() throws IOException {
         // Arrange
@@ -222,7 +216,6 @@ public class IngredientManagementTest {
         assertTrue(result);
 
     }
-
     @Test
     public void testListIngredientsDLLNoIngredients() {
         // Arrange
@@ -236,7 +229,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("No ingredients available."));
     }
-
     @Test
     public void testListIngredientsXLLNoIngredients() {
         // Arrange
@@ -250,7 +242,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("No ingredients available."));
     }
-
     @Test
     public void testListIngredients() {
         // Arrange
@@ -277,7 +268,6 @@ public class IngredientManagementTest {
         assertTrue(output.contains("Available Ingredients (DLL):"));
         //assertTrue(output.contains("ID: 1, Name: Tomato, Price: 2.00"));
     }
-
     @Test
     public void testListIngredientsCase2() {
         // Arrange
@@ -337,7 +327,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("Invalid choice. Please try again."));
     }
-
     @Test
     public void testRemoveIngredient() throws IOException {
         // Arrange
@@ -483,7 +472,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("Ingredient with ID 2 not found."));
     }
-
     @Test
     public void testEditIngredientNoIngredients() throws IOException {
         // Arrange
@@ -503,7 +491,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("No ingredients available to edit."));
     }
-
     @Test
     public void testRemoveIngredientNoIngredients() throws IOException {
         // Arrange
@@ -517,7 +504,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("No ingredients to remove."));
     }
-
     @Test
     public void testIngredientManagementMenuViewIngredients() throws IOException, InterruptedException {
         // Arrange
@@ -578,7 +564,6 @@ public class IngredientManagementTest {
         Ingredient loadedHead = ingredientManagement.loadIngredientsFromFile(ingredientTestFile);
         assertNull(loadedHead);
     }
-
     @Test
     public void testIngredientManagementMenuRemoveIngredient2XLL() throws IOException, InterruptedException {
         // Arrange
@@ -609,7 +594,6 @@ public class IngredientManagementTest {
         Ingredient loadedHead = ingredientManagement.loadIngredientsFromFile(ingredientTestFile);
         assertNull(loadedHead);
     }
-
     @Test
     public void testIngredientManagementMenuRemoveIngredientNoIngredient() throws IOException, InterruptedException {
         String userInput = "3\n\n6\n"; // Remove ingredient and then exit
@@ -628,7 +612,6 @@ public class IngredientManagementTest {
         Ingredient loadedHead = ingredientManagement.loadIngredientsFromFile(ingredientTestFile);
         assertNull(loadedHead);
     }
-
     @Test
     public void testIngredientManagementMenuEditIngredient() throws IOException, InterruptedException {
         // Arrange
@@ -678,7 +661,6 @@ public class IngredientManagementTest {
         assertTrue(result);
 
     }
-
     @Test
     public void testIngredientManagementMenuViewIngredientsEmpty() throws IOException, InterruptedException {
         // Arrange
@@ -738,7 +720,6 @@ public class IngredientManagementTest {
         assertTrue(output.contains("Name: Onion"));
         //assertTrue(output.contains("Price: 1.50"));
     }
-
     @Test
     public void testComputeLPSArray() {
         // Arrange
@@ -833,7 +814,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("No ingredients available to search."));
     }
-
     @Test
     public void testAddIngredientValidInput() throws IOException, InterruptedException {
         // Arrange
@@ -910,7 +890,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("Invalid input. Please enter a valid number for the price."));
     }
-
     @Test
     public void testIngredientNavigationValidChoices() throws IOException, InterruptedException {
         // Arrange
@@ -980,7 +959,6 @@ public class IngredientManagementTest {
         String output = outContent.toString();
         assertTrue(output.contains("Invalid choice or no more ingredients in that direction."));
     }
-
     @Test
     public void testSearchIngredientByValidName() throws IOException, InterruptedException {
         // Arrange
@@ -1064,5 +1042,4 @@ public class IngredientManagementTest {
     private void deleteFile(String filePath) throws IOException {
         Files.deleteIfExists(Paths.get(filePath));
     }
-
 }
