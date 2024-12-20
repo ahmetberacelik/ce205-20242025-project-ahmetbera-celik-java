@@ -1,80 +1,44 @@
 /**
+ * @file CostcalculatorApp.java
+ * @brief Entry point for the Recipe Cost Calculator application.
+ */
 
-@file CostcalculatorApp.java
-@brief This file serves as the main application file for the Costcalculator App.
-@details This file contains the entry point of the application, which is the main method. It initializes the necessary components and executes the Costcalculator App.
-*/
-/**
-
-@package com.bera.yakup.hasan.enes.costcalculator
-@brief The com.bera.yakup.hasan.enes.costcalculator package contains all the classes and files related to the Costcalculator App.
-*/
 package com.bera.yakup.hasan.enes.costcalculator;
 
+import java.util.Scanner;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Logger;
-
 /**
- *
  * @class CostcalculatorApp
- * @brief This class represents the main application class for the Costcalculator
- *        App.
- * @details The CostcalculatorApp class provides the entry point for the Costcalculator
- *          App. It initializes the necessary components, performs calculations,
- *          and handles exceptions.
- * @author ugur.coruh
+ * @brief The main application class for running the Recipe Cost Calculator.
+ *
+ * This class initializes the required components and starts the application by invoking
+ * the main menu of the UserAuthentication module.
  */
 public class CostcalculatorApp {
-  /**
-   * @brief Logger for the CostcalculatorApp class.
-   */
-  private static final Logger logger = (Logger) LoggerFactory.getLogger(CostcalculatorApp.class);
 
   /**
-   * @brief The main entry point of the Costcalculator App.
+   * @brief The main method and entry point of the application.
    *
-   * @details The main method is the starting point of the Costcalculator App. It
-   *          initializes the logger, performs logging, displays a greeting
-   *          message, and handles user input.
+   * Initializes the application by creating instances of required classes and
+   * calling the main menu. The application handles user authentication, ingredient
+   * management, and recipe costing.
    *
-   * @param args The command-line arguments passed to the application.
+   * @param args Command-line arguments (not used).
+   * @throws IOException If an I/O error occurs during file operations.
+   * @throws InterruptedException If the thread is interrupted.
    */
-  public static void main(String[] args) {
-    // Logging messages for informational purposes
-    logger.info("Logging message");
-    // Logging an error message
-    logger.error("Error message");
-    // Displaying a greeting message
-    System.out.println("Hello World!");
+  public static void main(String[] args) throws IOException, InterruptedException {
+    Scanner inputScanner = new Scanner(System.in); ///< Scanner for user input.
 
-    try {
-      // Checking if command-line arguments are provided
-      if (args != null) {
-        // Checking if there are any arguments
-        if (args.length > 0) {
-          // Checking if the first argument is "1"
-          if (args[0].equals("1")) {
-            // Throwing a dummy IOException
-            throw new IOException("Dummy Exception...");
-          }
-        }
-      }
+    // Initialize UserAuthentication and necessary file paths
+    UserAuthentication userAuthentication = new UserAuthentication(inputScanner, System.out);
+    String pathFileIngredients = "ingredients.bin"; ///< Path to the ingredients file.
+    String pathFileRecipes = "recipes.bin"; ///< Path to the recipes file.
+    String pathFileUsers = "users.bin"; ///< Path to the users file.
 
-      // Prompting the user to press Enter to continue
-      System.out.println("Press Enter to Continue...");
-      // Reading user input from the console
-      System.in.read();
-      // Displaying a closing message
-      System.out.println("Thank you...");
-    } catch (IOException e) {
-      // Logging the exception
-      logger.error(e.toString());
-      // Printing the exception stack trace
-      e.printStackTrace();
-    }
+    // Start the main menu
+    userAuthentication.mainMenu(pathFileUsers, pathFileIngredients, pathFileRecipes);
   }
-
 }
