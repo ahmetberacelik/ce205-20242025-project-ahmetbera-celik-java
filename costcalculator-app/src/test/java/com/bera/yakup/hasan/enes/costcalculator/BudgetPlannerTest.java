@@ -115,4 +115,187 @@ public class BudgetPlannerTest {
         Assert.assertTrue(output.contains("Tomato Soup"));
     }
 
+    @Test
+    public void listRecipesWithPricesEmptyRecipesTest() throws IOException {
+        // Write empty recipes file
+        RecipeCosting recipeCosting = new RecipeCosting(null, null, null, System.out);
+        recipeCosting.saveRecipesToFile(recipeCostingTestFile, new ArrayList<>());
+
+        // Test
+        BudgetPlanner budgetPlanner = simulateUserInput("\n");
+        int result = budgetPlanner.listRecipesWithPrices(recipeCostingTestFile, ingredientTestFile);
+        Assert.assertEquals(0, result);
+        String output = outContent.toString();
+        Assert.assertTrue(output.contains("No recipes found."));
+    }
+    @Test
+    public void testViewBudget() throws IOException, InterruptedException {
+        // Setup a budget value
+        double budget = 150;
+        BudgetPlanner budgetPlanner = simulateUserInput("\n");
+        // Execute test
+        int result = budgetPlanner.viewBudget(budget);
+
+        // Verify
+        Assert.assertEquals(1, result);
+    }
+    @Test
+    public void planMealsTest() throws IOException, InterruptedException {
+        // Simulate recipes and ingredients files
+        List<Recipe> recipes = new ArrayList<>();
+        List<Ingredient> ingredients = new ArrayList<>();
+
+        // Add mock data
+        Ingredient ingredient1 = new Ingredient();
+        ingredient1.setId(1);
+        ingredient1.setName("Tomato");
+        ingredient1.setPrice(2.5f);
+        ingredients.add(ingredient1);
+
+        Recipe recipe1 = new Recipe("Tomato Soup", 1);
+        recipe1.setIngredients(Collections.singletonList(1));
+        recipes.add(recipe1);
+
+        // Write mock data to files
+        RecipeCosting recipeCosting = new RecipeCosting(null, null, null, System.out);
+        recipeCosting.saveRecipesToFile(recipeCostingTestFile, recipes);
+
+        PriceAdjustment priceAdjustment = new PriceAdjustment(null, null, null, System.out);
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(ingredientTestFile))) {
+            for (Ingredient ing : ingredients) {
+                writer.writeInt(ing.getId());
+                writer.writeUTF(ing.getName());
+                writer.writeFloat(ing.getPrice());
+            }
+        }
+
+        // Simulate user input
+        BudgetPlanner budgetPlanner = simulateUserInput("500\n1\ndone\n");
+
+        double updatedBudget = budgetPlanner.planMeals(recipeCostingTestFile, ingredientTestFile, 500.0);
+        Assert.assertEquals(497.5, updatedBudget, 0.01);
+
+        String output = outContent.toString();
+        Assert.assertTrue(output.contains("Tomato Soup"));
+        Assert.assertTrue(output.contains("Remaining budget: 497.50"));
+    }
+
+    @Test
+    public void budgetPlannerMenuTest() throws IOException, InterruptedException {
+        BudgetPlanner budgetPlanner = simulateUserInput("500\n3\n");
+        int result = budgetPlanner.budgetPlannerMenu(recipeCostingTestFile, ingredientTestFile);
+        Assert.assertEquals(1, result);
+
+        String output = outContent.toString();
+        Assert.assertTrue(output.contains("Enter your current budget"));
+        Assert.assertTrue(output.contains("Budget Planner Menu"));
+    }
+    @Test
+    public void invalidChoiceTest() throws IOException, InterruptedException {
+        BudgetPlanner budgetPlanner = simulateUserInput("500\n5\n\n3\n");
+        int result = budgetPlanner.budgetPlannerMenu(recipeCostingTestFile, ingredientTestFile);
+        Assert.assertEquals(1, result);
+
+        String output = outContent.toString();
+        Assert.assertTrue(output.contains("Invalid choice. Please try again."));
+        Assert.assertTrue(output.contains("Budget Planner Menu"));
+    }
+
+    @Test
+    public void invalidInputTest() throws IOException, InterruptedException {
+        BudgetPlanner budgetPlanner = simulateUserInput("500\nabc\n\n3\n");
+        int result = budgetPlanner.budgetPlannerMenu(recipeCostingTestFile, ingredientTestFile);
+        Assert.assertEquals(1, result);
+
+        String output = outContent.toString();
+        Assert.assertTrue(output.contains("Only enter numerical value"));
+        Assert.assertTrue(output.contains("Budget Planner Menu"));
+    }
+    @Test
+    public void budgetPlannerMenuTestPlanMeals() throws IOException, InterruptedException {
+        List<Recipe> recipes = new ArrayList<>();
+        List<Ingredient> ingredients = new ArrayList<>();
+
+        // Add mock data
+        Ingredient ingredient1 = new Ingredient();
+        ingredient1.setId(1);
+        ingredient1.setName("Tomato");
+        ingredient1.setPrice(2.5f);
+        ingredients.add(ingredient1);
+
+        Recipe recipe1 = new Recipe("Tomato Soup", 1);
+        recipe1.setIngredients(Collections.singletonList(1));
+        recipes.add(recipe1);
+
+        // Write mock data to files
+        RecipeCosting recipeCosting = new RecipeCosting(null, null, null, System.out);
+        recipeCosting.saveRecipesToFile(recipeCostingTestFile, recipes);
+
+        PriceAdjustment priceAdjustment = new PriceAdjustment(null, null, null, System.out);
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(ingredientTestFile))) {
+            for (Ingredient ing : ingredients) {
+                writer.writeInt(ing.getId());
+                writer.writeUTF(ing.getName());
+                writer.writeFloat(ing.getPrice());
+            }
+        }
+
+        BudgetPlanner budgetPlanner = simulateUserInput("500\n1\nabc\ndone\n2\n\n3\n");
+        int result = budgetPlanner.budgetPlannerMenu(recipeCostingTestFile, ingredientTestFile);
+        Assert.assertEquals(1, result);
+    }
+    @Test
+    public void planMealsNoRecipesTest() throws IOException, InterruptedException {
+        // Write empty recipes file
+        RecipeCosting recipeCosting = new RecipeCosting(null, null, null, System.out);
+        recipeCosting.saveRecipesToFile(recipeCostingTestFile, new ArrayList<>());
+
+        // Simulate user input
+        BudgetPlanner budgetPlanner = simulateUserInput("500\n\n");
+
+        double updatedBudget = budgetPlanner.planMeals(recipeCostingTestFile, ingredientTestFile, 500.0);
+        Assert.assertEquals(500.0, updatedBudget, 0.01);
+
+        String output = outContent.toString();
+        Assert.assertTrue(output.contains("No recipes found for meal planning."));
+    }
+    @Test
+    public void testInsufficientBudget() throws IOException, InterruptedException {
+        // Simulate recipes and ingredients files
+        List<Recipe> recipes = new ArrayList<>();
+        List<Ingredient> ingredients = new ArrayList<>();
+
+        // Add mock data
+        Ingredient ingredient1 = new Ingredient();
+        ingredient1.setId(1);
+        ingredient1.setName("Expensive Ingredient");
+        ingredient1.setPrice(1000.0f);
+        ingredients.add(ingredient1);
+
+        Recipe recipe1 = new Recipe("Luxury Dish", 1);
+        recipe1.setIngredients(Collections.singletonList(1));
+        recipes.add(recipe1);
+
+        // Write mock data to files
+        RecipeCosting recipeCosting = new RecipeCosting(null, null, null, System.out);
+        recipeCosting.saveRecipesToFile(recipeCostingTestFile, recipes);
+
+        PriceAdjustment priceAdjustment = new PriceAdjustment(null, null, null, System.out);
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(ingredientTestFile))) {
+            for (Ingredient ing : ingredients) {
+                writer.writeInt(ing.getId());
+                writer.writeUTF(ing.getName());
+                writer.writeFloat(ing.getPrice());
+            }
+        }
+
+        // Simulate user input
+        BudgetPlanner budgetPlanner = simulateUserInput("500\n1\ndone\n");
+
+        double updatedBudget = budgetPlanner.planMeals(recipeCostingTestFile, ingredientTestFile, 500.0);
+        Assert.assertEquals(500.0, updatedBudget, 0.01); // Budget should not change
+
+        String output = outContent.toString();
+        Assert.assertTrue(output.contains("Cannot add 'Luxury Dish'. Insufficient funds."));
+    }
 }
