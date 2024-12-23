@@ -225,4 +225,120 @@ public class UserAuthenticationTest {
         Assert.assertTrue(result);
     }
 
+    @Test
+    public void testUserOperationsCase2() throws IOException, InterruptedException {
+        UserAuthentication userAuthenticationWithInput = this.simulateUserInput("2\n7\n5\n");
+        boolean result = userAuthenticationWithInput.userOperations(this.ingredientTestFile, this.recipesTestFile);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testUserOperationsCase3() throws IOException, InterruptedException {
+        UserAuthentication userAuthenticationWithInput = this.simulateUserInput("3\n3\n5\n");
+        boolean result = userAuthenticationWithInput.userOperations(this.ingredientTestFile, this.recipesTestFile);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testUserOperationsCase4() throws IOException, InterruptedException {
+        UserAuthentication userAuthenticationWithInput = this.simulateUserInput("4\n100\n3\n5\n");
+        boolean result = userAuthenticationWithInput.userOperations(this.ingredientTestFile, this.recipesTestFile);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testUserOperationsInvalidChoice() throws IOException, InterruptedException {
+        UserAuthentication userAuthenticationWithInput = this.simulateUserInput("9\n\nabc\n\n5\n");
+        boolean result = userAuthenticationWithInput.userOperations(this.ingredientTestFile, this.recipesTestFile);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testMainMenuInvalidChoice() throws IOException, InterruptedException {
+        UserAuthentication userAuthenticationWithInput = this.simulateUserInput("9\n\nabc\n\n4\n");
+        boolean result = userAuthenticationWithInput.mainMenu(this.usersTestFile, this.ingredientTestFile, this.recipesTestFile);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testMainMenuCase1LoginSuccessAndUserOperations() throws IOException, InterruptedException {
+        String userInput = "1\nuser@example.com\npassword123\n\n5\n4\n";
+        UserAuthentication userAuthentication = this.simulateUserInput(userInput);
+        User user = new User();
+        user.setName("Test");
+        user.setSurname("User");
+        user.setEmail("user@example.com");
+        user.setPassword("password123");
+        DataOutputStream writer = new DataOutputStream(new FileOutputStream(this.usersTestFile));
+
+        try {
+            writer.writeInt(1);
+            writer.writeUTF(user.getName());
+            writer.writeUTF(user.getSurname());
+            writer.writeUTF(user.getEmail());
+            writer.writeUTF(user.getPassword());
+        } catch (Throwable var8) {
+            try {
+                writer.close();
+            } catch (Throwable var7) {
+                var8.addSuppressed(var7);
+            }
+
+            throw var8;
+        }
+
+        writer.close();
+        boolean var9 = userAuthentication.mainMenu(this.usersTestFile, this.ingredientTestFile, this.recipesTestFile);
+        Assert.assertTrue(var9);
+    }
+
+    @Test
+    public void testMainMenuCase2RegisterUser() throws IOException, InterruptedException {
+        String userInput = "2\nJohn\nDoe\njohn.doe@example.com\npassword123\n\n4\n";
+        UserAuthentication userAuthentication = this.simulateUserInput(userInput);
+        boolean result = userAuthentication.mainMenu(this.usersTestFile, this.ingredientTestFile, this.recipesTestFile);
+        Assert.assertTrue(result);
+        List<User> users = userAuthentication.loadUsers(this.usersTestFile);
+        Assert.assertEquals(1L, (long) users.size());
+        Assert.assertEquals("John", ((User) users.get(0)).getName());
+        Assert.assertEquals("Doe", ((User) users.get(0)).getSurname());
+        Assert.assertEquals("john.doe@example.com", ((User) users.get(0)).getEmail());
+        Assert.assertEquals("password123", ((User) users.get(0)).getPassword());
+    }
+
+    @Test
+    public void testMainMenuCase3GuestOperations() throws IOException, InterruptedException {
+        String userInput = "3\n90\n\nabc\n\n3\n4\n";
+        UserAuthentication userAuthentication = this.simulateUserInput(userInput);
+        boolean result = userAuthentication.mainMenu(this.usersTestFile, this.ingredientTestFile, this.recipesTestFile);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testGuestOperationsShouldEnterEveryCaseAndExit() throws IOException, InterruptedException {
+        String userInput = "1\n\n2\n\n3\n";
+        createRecipeFile();
+        UserAuthentication userAuthentication = this.simulateUserInput(userInput);
+        userAuthentication.guestOperations(this.ingredientTestFile, this.recipesTestFile);
+    }
+
+    @Test
+    public void testPrintRecipesToConsole_NoRecipes() throws IOException, InterruptedException {
+        String userInput = "\n";
+        deleteFile(recipesTestFile);
+        UserAuthentication userAuthentication = this.simulateUserInput(userInput);
+        userAuthentication.printRecipesToConsole(this.ingredientTestFile, this.recipesTestFile);
+    }
+
+    @Test
+    public void testClearScreen_Linux() throws IOException, InterruptedException {
+        System.setProperty("os.name", "Linux");
+        userAuthentication.clearScreen();
+    }
+
+    @Test
+    public void testClearScreen_Windows() throws IOException, InterruptedException {
+        System.setProperty("os.name", "Windows 10");
+        userAuthentication.clearScreen();
+    }
 }
