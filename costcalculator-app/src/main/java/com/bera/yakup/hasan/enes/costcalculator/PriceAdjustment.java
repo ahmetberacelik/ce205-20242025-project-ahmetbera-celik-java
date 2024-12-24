@@ -1,3 +1,8 @@
+/**
+ * @file PriceAdjustment.java
+ * @brief This file contains the implementation of the PriceAdjustment class.
+ */
+
 package com.bera.yakup.hasan.enes.costcalculator;
 
 import java.io.DataOutputStream;
@@ -8,13 +13,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * @class PriceAdjustment
+ * @brief Manages operations related to ingredient price adjustments.
+ *
+ * The PriceAdjustment class provides functionalities to convert ingredient linked lists
+ * into arrays, print ingredients sorted by price, and adjust ingredient prices.
+ * It integrates with IngredientManagement for ingredient data operations.
+ */
 public class PriceAdjustment {
 
-    private Scanner scanner;
-    private PrintStream out;
-    private UserAuthentication userAuth;
-    private IngredientManagement ingredientManagement;
+    private Scanner scanner; ///< Scanner for user input.
+    private PrintStream out; ///< PrintStream for displaying output.
+    private UserAuthentication userAuth; ///< Instance of UserAuthentication for shared utilities.
+    private IngredientManagement ingredientManagement; ///< Instance of IngredientManagement for ingredient operations.
 
+    /**
+     * @brief Constructor for the PriceAdjustment class.
+     *
+     * @param userAuth Instance of UserAuthentication for shared utilities.
+     * @param ingredientManagement Instance of IngredientManagement for ingredient operations.
+     * @param scanner Scanner for user input.
+     * @param out PrintStream for displaying output.
+     */
     public PriceAdjustment(UserAuthentication userAuth, IngredientManagement ingredientManagement, Scanner scanner, PrintStream out) {
         this.userAuth = userAuth;
         this.ingredientManagement = ingredientManagement;
@@ -50,7 +71,16 @@ public class PriceAdjustment {
 
         return ingredients.size();
     }
-
+    /**
+     * @brief Converts a doubly linked list of ingredients into an array.
+     *
+     * The method loads ingredients from the specified file into a doubly linked list,
+     * converts the list into an array, and returns it.
+     *
+     * @param pathFileIngredients Path to the ingredient file.
+     * @return A list of Ingredient objects loaded from the file.
+     * @throws IOException If an I/O error occurs.
+     */
     public List<Ingredient> convertDoubleLinkToArray(String pathFileIngredients) throws IOException {
         Ingredient ingredients = ingredientManagement.loadIngredientsFromFile(pathFileIngredients);
         if (ingredients == null) {
@@ -509,5 +539,5 @@ public class PriceAdjustment {
             }
         }
     }
-
 }
+
