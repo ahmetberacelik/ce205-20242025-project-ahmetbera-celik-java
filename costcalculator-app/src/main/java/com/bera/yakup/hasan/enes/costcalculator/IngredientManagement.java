@@ -92,26 +92,6 @@ public class IngredientManagement {
     }
 
     /**
-     * @brief Decodes a string using a Huffman tree.
-     * @param root The root of the Huffman tree.
-     * @param encodedStr The encoded string.
-     * @return The decoded string.
-     */
-    public String decodeString(HuffmanTreeNode root, String encodedStr) {
-        StringBuilder decodedStr = new StringBuilder();
-        HuffmanTreeNode current = root;
-        for (char bit : encodedStr.toCharArray()) {
-            current = (bit == '0') ? current.getLeft() : current.getRight();
-
-            if (current.getLeft() == null && current.getRight() == null) {
-                decodedStr.append(current.getCharacter());
-                current = root;
-            }
-        }
-        return decodedStr.toString();
-    }
-
-    /**
      * @brief Counts character frequencies in a string.
      * @param input The input string.
      * @return An array of character frequencies.
@@ -147,34 +127,47 @@ public class IngredientManagement {
      * @return The decoded string.
      * @throws IOException If an I/O error occurs while reading the file.
      */
+    /**
+     * @brief Decodes the last encoded string from a .huf file using a Huffman tree.
+     * @param root The root of the Huffman tree.
+     * @param filePath The path to the .huf file containing the encoded strings.
+     * @return The decoded string of the last encoded line in the file.
+     * @throws IOException If an I/O error occurs while reading the file.
+     */
     public String decodeStringFromFile(HuffmanTreeNode root, String filePath) throws IOException {
         // Ensure the file has a .huf extension
         if (!filePath.endsWith(".huf")) {
             throw new IllegalArgumentException("Invalid file extension. Please provide a .huf file.");
         }
 
-        // Read the encoded string from the .huf file
-        StringBuilder encodedStr = new StringBuilder();
+        String lastEncodedLine = null;
+
+        // Read the last line from the .huf file
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                encodedStr.append(line);
+                lastEncodedLine = line;
             }
         }
 
-        // Decode the encoded string using the Huffman tree
+        if (lastEncodedLine == null) {
+            throw new IOException("The file is empty or no encoded string found.");
+        }
+
+        // Decode the last encoded string using the Huffman tree
         StringBuilder decodedStr = new StringBuilder();
         HuffmanTreeNode current = root;
-        for (char bit : encodedStr.toString().toCharArray()) {
+        for (char bit : lastEncodedLine.toCharArray()) {
             current = (bit == '0') ? current.getLeft() : current.getRight();
-
             if (current.getLeft() == null && current.getRight() == null) {
                 decodedStr.append(current.getCharacter());
                 current = root;
             }
         }
+
         return decodedStr.toString();
     }
+
 
     /**
      * @brief Adds a new ingredient to the list and saves it to a file.
