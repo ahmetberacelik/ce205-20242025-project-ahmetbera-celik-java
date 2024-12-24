@@ -123,6 +123,58 @@ public class IngredientManagement {
         }
         return frequencies;
     }
+    /**
+     * @brief Appends the encoded string of an ingredient to a .huf file.
+     * @param encodedString The encoded string to save.
+     * @param filePath The file path where the encoded string will be saved (with .huf extension).
+     * @throws IOException If an I/O error occurs while writing to the file.
+     */
+    public void saveEncodedStringToFile(String encodedString, String filePath) throws IOException {
+        // Ensure the file has a .huf extension
+        if (!filePath.endsWith(".huf")) {
+            filePath += ".huf";
+        }
+
+        // Append the encoded string to the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // 'true' for appending to the file
+            writer.write(encodedString + "\n");
+        }
+    }
+    /**
+     * @brief Decodes a string using a Huffman tree and reads the encoded string from a .huf file.
+     * @param root The root of the Huffman tree.
+     * @param filePath The path to the .huf file containing the encoded string.
+     * @return The decoded string.
+     * @throws IOException If an I/O error occurs while reading the file.
+     */
+    public String decodeStringFromFile(HuffmanTreeNode root, String filePath) throws IOException {
+        // Ensure the file has a .huf extension
+        if (!filePath.endsWith(".huf")) {
+            throw new IllegalArgumentException("Invalid file extension. Please provide a .huf file.");
+        }
+
+        // Read the encoded string from the .huf file
+        StringBuilder encodedStr = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                encodedStr.append(line);
+            }
+        }
+
+        // Decode the encoded string using the Huffman tree
+        StringBuilder decodedStr = new StringBuilder();
+        HuffmanTreeNode current = root;
+        for (char bit : encodedStr.toString().toCharArray()) {
+            current = (bit == '0') ? current.getLeft() : current.getRight();
+
+            if (current.getLeft() == null && current.getRight() == null) {
+                decodedStr.append(current.getCharacter());
+                current = root;
+            }
+        }
+        return decodedStr.toString();
+    }
 
     /**
      * @brief Adds a new ingredient to the list and saves it to a file.
@@ -139,8 +191,10 @@ public class IngredientManagement {
         String[] codes = new String[256];
         generateHuffmanCodes(root, "", codes);
 
+        // Kodlama işlemi tamamlandıktan sonra encoded string'i dosyaya kaydedin
         String encodedName = encodeString(name, codes);
-        String decodedName = decodeString(root, encodedName);
+        saveEncodedStringToFile(encodedName, "encoded_ingredient.huf");
+        String decodedName = decodeStringFromFile(root, "encoded_ingredient.huf");
 
         Ingredient newIngredient = new Ingredient();
         int newId = 1;
