@@ -473,7 +473,7 @@ public class UserAuthentication {
      * @brief Inserts a user into the XOR doubly linked list.
      * @param user User data to insert.
      */
-    private void insertXORNode(User user) {
+    public void insertXORNode(User user) {
         XORNode newNode = new XORNode(user);
         if (head == null) {
             head = newNode;
@@ -572,7 +572,7 @@ public class UserAuthentication {
      * @return Head of the XOR linked list, or null if no users exist.
      * @throws IOException If an I/O error occurs.
      */
-    private XORNode loadUsersIntoXORList(String pathFileUsers) throws IOException {
+    public XORNode loadUsersIntoXORList(String pathFileUsers) throws IOException {
         List<User> users = loadUsers(pathFileUsers);
         if (users.isEmpty()) {
             return null;
