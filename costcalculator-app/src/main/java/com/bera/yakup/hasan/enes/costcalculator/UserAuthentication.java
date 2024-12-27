@@ -23,6 +23,7 @@ public class UserAuthentication {
     private RecipeCosting recipeCosting; ///< Handles recipe costing operations.
     private BudgetPlanner budgetPlanner; ///< Manages budget planning functionalities.
     private PriceAdjustment priceAdjustment; ///< Adjusts ingredient prices.
+    private XORNode head; // Add this as a class field
 
     /**
      * @brief Constructor for UserAuthentication.
@@ -32,6 +33,7 @@ public class UserAuthentication {
     public UserAuthentication(Scanner scanner, PrintStream out) {
         this.scanner = scanner;
         this.out = out;
+        this.head = null;
         this.ingredientManagement = new IngredientManagement(this, scanner, out);
         this.priceAdjustment = new PriceAdjustment(this, ingredientManagement, scanner, out);
         this.recipeCosting = new RecipeCosting(this, priceAdjustment, scanner, out);
@@ -97,6 +99,7 @@ public class UserAuthentication {
         out.println("| 2. Register                           |");
         out.println("| 3. Guest Operations                   |");
         out.println("| 4. Exit Program                       |");
+        out.println("| 5. View Users (ForAdmins)             |");
         out.println("+---------------------------------------+");
         out.print("\nPlease enter a number to select: ");
     }
@@ -448,11 +451,147 @@ public class UserAuthentication {
                 case 4:
                     out.println("Exit Program");
                     return true;
+                case 5:
+                    clearScreen();
+                    XORNode userList = loadUsersIntoXORList(pathFileUsers);
+                    if (userList == null) {
+                        out.println("No users found to display.");
+                        enterToContinue();
+                    } else {
+                        viewUsers(userList);
+                    }
+                    break;
                 default:
                     out.println("Invalid choice. Please try again.");
                     enterToContinue();
                     break;
             }
         }
+    }
+
+    /**
+     * @brief Inserts a user into the XOR doubly linked list.
+     * @param user User data to insert.
+     */
+    private void insertXORNode(User user) {
+        XORNode newNode = new XORNode(user);
+        if (head == null) {
+            head = newNode;
+            return;
+        }
+
+        XORNode current = head;
+        while (current.getNext() != null) {
+            current = current.getNext();
+        }
+
+        current.setNext(newNode);
+        newNode.setPrev(current);
+    }
+
+    /**
+     * @brief Displays all users stored in the linked list with navigation options.
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If interrupted during processing.
+     */
+    public void viewUsers(XORNode head) throws IOException, InterruptedException {
+        if (head == null) {
+            out.println("No users available to display.");
+            enterToContinue();
+            return;
+        }
+
+        XORNode current = head;
+        while (true) {
+            clearScreen();
+            out.println("+---------------------------------------+");
+            out.println("|               USERS                   |");
+            out.println("+---------------------------------------+");
+            out.println("ID: " + current.getUser().getId());
+            out.println("Name: " + current.getUser().getName() + " " + current.getUser().getSurname());
+            out.println("Email: " + current.getUser().getEmail());
+            out.println("+---------------------------------------+");
+            out.println("1. Next");
+            out.println("2. Previous");
+            out.println("3. Exit");
+            out.print("Enter your choice: ");
+
+            int choice = getInput();
+            if (choice == -2) {
+                handleInputError();
+                enterToContinue();
+                continue;
+            }
+
+            switch (choice) {
+                case 1: // Move to next node
+                    if (current.getNext() != null) {
+                        current = current.getNext();
+                    } else {
+                        out.println("You are at the last user.");
+                        enterToContinue();
+                    }
+                    break;
+
+                case 2: // Move to previous node
+                    if (current.getPrev() != null) {
+                        current = current.getPrev();
+                    } else {
+                        out.println("You are at the first user.");
+                        enterToContinue();
+                    }
+                    break;
+
+                case 3: // Exit
+                    out.println("Exiting user view...");
+                    return;
+
+                default:
+                    out.println("Invalid choice. Please try again.");
+                    enterToContinue();
+                    break;
+            }
+        }
+    }
+
+    /**
+     * @brief Loads users from a file into the linked list structure.
+     * @param pathFileUsers Path to the file containing user data.
+     * @throws IOException If an I/O error occurs.
+     */
+    public void loadUsersIntoList(String pathFileUsers) throws IOException {
+        List<User> users = loadUsers(pathFileUsers);
+        for (User user : users) {
+            insertXORNode(user);
+        }
+    }
+
+    /**
+     * @brief Loads users from a file and constructs an XOR linked list.
+     * @param pathFileUsers Path to the file containing user data.
+     * @return Head of the XOR linked list, or null if no users exist.
+     * @throws IOException If an I/O error occurs.
+     */
+    private XORNode loadUsersIntoXORList(String pathFileUsers) throws IOException {
+        List<User> users = loadUsers(pathFileUsers);
+        if (users.isEmpty()) {
+            return null;
+        }
+        
+        XORNode head = null;
+        for (User user : users) {
+            XORNode newNode = new XORNode(user);
+            if (head == null) {
+                head = newNode;
+            } else {
+                XORNode current = head;
+                while (current.getNext() != null) {
+                    current = current.getNext();
+                }
+                current.setNext(newNode);
+                newNode.setPrev(current);
+            }
+        }
+        return head;
     }
 }
