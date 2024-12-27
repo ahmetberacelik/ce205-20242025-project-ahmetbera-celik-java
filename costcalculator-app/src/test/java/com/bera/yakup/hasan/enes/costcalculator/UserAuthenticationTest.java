@@ -5,6 +5,8 @@
 
 package com.bera.yakup.hasan.enes.costcalculator;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -16,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
+import java.io.File;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -340,5 +343,121 @@ public class UserAuthenticationTest {
     public void testClearScreen_Windows() throws IOException, InterruptedException {
         System.setProperty("os.name", "Windows 10");
         userAuthentication.clearScreen();
+    }
+
+    @Test
+    public void testLoadUsersIntoXORList() throws IOException {
+        // Setup
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(outputStream);
+        Scanner scanner = new Scanner(System.in);
+        UserAuthentication auth = new UserAuthentication(scanner, printStream);
+        
+        // Create a temporary test file with sample users
+        try (DataOutputStream writer = new DataOutputStream(new FileOutputStream(usersTestFile))) {
+            // Write test user 1
+            writer.writeInt(1);
+            writer.writeUTF("John");
+            writer.writeUTF("Doe");
+            writer.writeUTF("john@test.com");
+            writer.writeUTF("pass123");
+            
+            // Write test user 2
+            writer.writeInt(2);
+            writer.writeUTF("Jane");
+            writer.writeUTF("Smith");
+            writer.writeUTF("jane@test.com");
+            writer.writeUTF("pass456");
+        }
+        
+        // Test loading users into XOR list
+        XORNode head = auth.loadUsersIntoXORList(usersTestFile);
+        
+        // Verify the loaded users
+        assertNotNull(head);
+        assertEquals(1, head.getUser().getId());
+        assertEquals("John", head.getUser().getName());
+        assertEquals("Doe", head.getUser().getSurname());
+        
+        XORNode second = head.getNext();
+        assertNotNull(second);
+        assertEquals(2, second.getUser().getId());
+        assertEquals("Jane", second.getUser().getName());
+        assertEquals("Smith", second.getUser().getSurname());
+        
+        // Verify XOR list links
+        assertNull(head.getPrev());
+        assertNotNull(head.getNext());
+        assertEquals(head, second.getPrev());
+        assertNull(second.getNext());
+        
+        // Clean up
+        deleteFile(usersTestFile);
+    }
+
+    @Test
+    public void testLoadUsersIntoXORListEmptyFile() throws IOException {
+        // Setup
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(outputStream);
+        Scanner scanner = new Scanner(System.in);
+        UserAuthentication auth = new UserAuthentication(scanner, printStream);
+        
+        // Create empty temporary file
+        File file = new File(usersTestFile);
+        file.createNewFile();
+        
+        // Test loading from empty file
+        XORNode head = auth.loadUsersIntoXORList(usersTestFile);
+        
+        // Verify result
+        assertNull(head);
+        
+        // Clean up
+        deleteFile(usersTestFile);
+    }
+
+    @Test
+    public void testViewUsersNavigation() throws IOException, InterruptedException {
+        // Setup test input for navigation
+        String input = "1\n2\n3\n"; // Next, Previous, Exit
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes());
+        System.setIn(inputStream);
+        
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(outputStream);
+        Scanner scanner = new Scanner(System.in);
+        UserAuthentication auth = new UserAuthentication(scanner, printStream);
+        
+        // Create test users in XOR list
+        User user1 = new User();
+        user1.setId(1);
+        user1.setName("Test");
+        user1.setSurname("User1");
+        user1.setEmail("test1@test.com");
+        
+        User user2 = new User();
+        user2.setId(2);
+        user2.setName("Test");
+        user2.setSurname("User2");
+        user2.setEmail("test2@test.com");
+        
+        XORNode head = new XORNode(user1);
+        XORNode second = new XORNode(user2);
+        head.setNext(second);
+        second.setPrev(head);
+        
+        // Test view users navigation
+        auth.viewUsers(head);
+        
+        // Verify output contains user information
+        String output = outputStream.toString();
+        assertTrue(output.contains("Test User1"));
+        assertTrue(output.contains("test1@test.com"));
+        assertTrue(output.contains("Test User2"));
+        assertTrue(output.contains("test2@test.com"));
+        
+        // Reset System.in
+        System.setIn(System.in);
     }
 }
